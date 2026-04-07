@@ -18,5 +18,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('flights',[FlightController::class, 'index']);
+Route::get('flights',[FlightController::class, 'flights']);
 Route::post('flights/search',[FlightController::class, 'search']);
