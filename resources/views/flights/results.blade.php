@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flight Results</title>
+</head>
+<body>
+
 <h2>Available Flights</h2>
 
 @if($flights->isEmpty())
@@ -24,4 +31,15 @@
         </tr>
         @endforeach
     </table>
+
+    <br>
+
+    <!-- ✅ Pagination -->
+    {{ $flights->links() }}
 @endif
+
+<br><br>
+<a href="/flights">Back to Search</a>
+
+</body>
+</html>

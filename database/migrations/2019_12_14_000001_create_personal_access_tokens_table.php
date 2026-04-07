@@ -13,13 +13,14 @@ class CreatePersonalAccessTokensTable extends Migration
      */
     public function up()
     {
-        Schema::create('personal_access_tokens', function (Blueprint $table) {
+        Schema::create('flights', function (Blueprint $table) {
             $table->id();
-            $table->morphs('tokenable');
-            $table->string('name');
-            $table->string('token', 64)->unique();
-            $table->text('abilities')->nullable();
-            $table->timestamp('last_used_at')->nullable();
+            $table->string('from');
+            $table->string('to');
+            $table->date('departure_date');
+            $table->time('departure_time');
+            $table->decimal('price', 8, 2);
+            $table->integer('available_seats');
             $table->timestamps();
         });
     }
