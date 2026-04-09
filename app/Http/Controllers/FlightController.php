@@ -7,11 +7,13 @@ use App\Models\Flight;
 
 class FlightController extends Controller
 {
+    // Show flight search form
     public function index()
     {
-        return view('flights.search'); // this view must exist
+        return view('flight'); // changed from 'flights.search' to 'flight'
     }
 
+    // Handle flight search
     public function search(Request $request)
     {
         $request->validate([

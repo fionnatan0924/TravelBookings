@@ -18,5 +18,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('flights',[FlightController::class, 'flights']);
-Route::post('flights/search',[FlightController::class, 'search']);
+// Flight search routes
+Route::get('/flight', [FlightController::class, 'index'])->name('flights.search'); // shows the search form (flight.blade.php)
+Route::post('/flight/search', [FlightController::class, 'search'])->name('flights.results'); // handles search form submission
