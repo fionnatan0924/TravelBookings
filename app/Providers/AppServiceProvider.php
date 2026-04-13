@@ -26,4 +26,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191); // This is to avoid issues with older MySQL versions and string length
     }
+
+    protected $policies = [
+        Booking::class => BookingPolicy::class,
+        ComboBooking::class => ComboBookingPolicy::class,
+    ];
+
+
 }

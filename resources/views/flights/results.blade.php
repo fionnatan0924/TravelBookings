@@ -194,35 +194,30 @@
     </style>
 </head>
 <body>
-<div class="container">
-    {{-- Search summary header --}}
-    <div class="search-summary">
-        <div class="route-title">
+<div class="search-summary">
+    <div class="route-title">
+        @if($tripType === 'multi')
+            Multi-city trip
+        @else
+            {{ $searchParams['origin'] }} → {{ $searchParams['destination'] }}
+        @endif
+        <span class="flight-count">
             @if($tripType === 'multi')
-                Multi-city trip
+                {{ collect($results)->sum(fn($r) => count($r['flights'])) }} flights found
             @else
-                {{ $searchParams['origin'] }} → {{ $searchParams['destination'] }}
+                {{ count($outboundFlights) }} flights found
             @endif
-            <span class="flight-count">
-                @if($tripType === 'multi')
-                    {{ collect($results)->sum(fn($r) => count($r['flights'])) }} flights found
-                @else
-                    {{ count($outboundFlights) }} flights found
-                @endif
-            </span>
-        </div>
-        <div style="font-size:0.85rem; color:#5b7e9c; margin-top: 6px;">
+        </span>
+    </div>
+    <div style="font-size:0.85rem; color:#5b7e9c; margin-top: 6px;">
+        @if($tripType !== 'multi')
             {{ $searchParams['departure_date'] }} • {{ ucfirst($searchParams['class']) }} • 
             {{ $searchParams['adults'] }} Adult(s)
-        </div>
+        @else
+            {{ ucfirst($searchParams['class']) }} • {{ $searchParams['adults'] }} Adult(s)
+        @endif
     </div>
-
-    {{-- Sorting tabs (UI only, you can add JS sorting later) --}}
-    <div class="sorting-tabs">
-        <button class="sort-btn active">Direct first</button>
-        <button class="sort-btn">Recommended</button>
-        <button class="sort-btn">Cheapest</button>
-    </div>
+</div>
 
     {{-- FLIGHT LISTINGS --}}
     @if($tripType === 'multi')
@@ -241,7 +236,7 @@
         @forelse($outboundFlights as $flight)
             @include('flights._flight_card', ['flight' => $flight, 'type' => 'outbound'])
         @empty
-            <div class="no-flights">😞 No outbound flights found. Try different dates.</div>
+            <div class="no-flights">No outbound flights found. Try different dates.</div>
         @endforelse
 
         {{-- Return flights (round trip) --}}

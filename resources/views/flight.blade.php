@@ -307,7 +307,24 @@
     </style>
 </head>
 <body>
-
+@if(session()->has('flight_searches') && count(session('flight_searches')) > 0)
+<div style="margin-top: 2rem; background: #f0f4f9; padding: 1rem; border-radius: 1rem;">
+    <h4 style="margin-bottom: 0.75rem; color: #1e2f3e;">
+        <i class="fa-regular fa-clock"></i> Recent searches
+    </h4>
+    <ul style="list-style: none; padding: 0; margin: 0;">
+        @foreach(session('flight_searches') as $search)
+        <li style="margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem;">
+            <div style="font-weight: 600;">{{ $search['from'] }} → {{ $search['to'] }}</div>
+            <div style="color: #5b7e9c;">
+                {{ $search['departure_date'] }} • {{ ucfirst($search['class']) }} • {{ $search['adults'] }} adult(s)
+                <small style="display: block; margin-top: 4px;">{{ $search['searched_at'] }}</small>
+            </div>
+        </li>
+        @endforeach
+    </ul>
+</div>
+@endif
 <div class="flight-card">
     <div class="card-header">
         <h2><i class="fa-solid fa-plane-departure"></i> Travelio</h2>

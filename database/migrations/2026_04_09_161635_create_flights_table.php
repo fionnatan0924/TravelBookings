@@ -13,9 +13,16 @@ return new class extends Migration
             $table->string('origin');
             $table->string('destination');
             $table->date('departure_date');
-            $table->string('cabin_class');  // economy, premium, business, first
+            $table->time('departure_time');
+            $table->time('arrival_time');
+            $table->string('airline');
+            $table->enum('cabin_class', ['economy', 'premium', 'business', 'first']);
             $table->decimal('price', 10, 2);
-            $table->integer('available_seats');
+            $table->integer('available_seats')->default(50);
+            $table->string('duration')->default('2h 30m');
+            $table->string('origin_terminal')->default('T1');
+            $table->string('destination_terminal')->default('T2');
+            $table->string('baggage')->default('Checked baggage 20 kg');
             $table->timestamps();
         });
     }

@@ -17,4 +17,8 @@ class Flight extends Model
         'available_seats',
         'price',
     ];
+
+    
+public function bookings() { 
+    return $this->hasMany(Booking::class, 'outbound_flight_id'); }
 }
