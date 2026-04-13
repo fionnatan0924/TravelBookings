@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Schema::defaultStringLength(191); // This is to avoid issues with older MySQL versions and string length
+        Schema::defaultStringLength(191);
     }
 
     protected $policies = [

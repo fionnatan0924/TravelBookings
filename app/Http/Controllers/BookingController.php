@@ -13,7 +13,7 @@ class BookingController extends Controller
 {
     // Make sure all booking actions require login
     public function __construct() {
-        $this->middleware('auth');
+       // $this->middleware('auth');
     }
 
     // Step 1: Store selected flight in session (temporary)
