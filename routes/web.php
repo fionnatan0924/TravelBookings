@@ -77,3 +77,28 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/combo/{comboBooking}', [ComboController::class, 'show'])->name('combo.show');
     Route::patch('/combo/{comboBooking}/cancel', [ComboController::class, 'cancel'])->name('combo.cancel');
 });
+
+    // ========== FLIGHT BOOKING ROUTES ==========
+    // Step 1: Select a flight (from results page)
+    Route::post('/booking/select', [BookingController::class, 'selectFlight'])->name('booking.select');
+    
+    // Step 2: Show luggage options
+    Route::get('/booking/luggage', [BookingController::class, 'showLuggageForm'])->name('booking.luggage');
+    
+    // Step 3: Process luggage choice
+    Route::post('/booking/luggage', [BookingController::class, 'processLuggage'])->name('booking.processLuggage');
+    
+    // Step 4: Show passenger form
+    Route::get('/booking/passengers', [BookingController::class, 'showPassengerForm'])->name('booking.passengers');
+    
+    // Step 5: Process passenger details and create booking
+    Route::post('/booking/passengers', [BookingController::class, 'processPassengers'])->name('booking.processPassengers');
+    
+    // Step 6: Show booking confirmation
+    Route::get('/booking/confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
+    
+    // CRUD for bookings
+    Route::get('/bookings', [BookingController::class, 'index'])->name('booking.index');           // List all user bookings
+    Route::get('/booking/{booking}', [BookingController::class, 'show'])->name('booking.show');   // View single booking
+    Route::patch('/booking/{booking}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel'); // Cancel booking
+    Route::delete('/booking/{booking}', [BookingController::class, 'destroy'])->name('booking.destroy'); // Delete booking
