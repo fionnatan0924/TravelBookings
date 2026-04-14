@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Hotel extends Model
 {
-    protected $fillable=['name','city','address','price_per_night','stars','amenities'];
+    // app/Models/Hotel.php
+protected $fillable = [
+    'name', 'city', 'address', 'price_per_night', 'stars', 'amenities', 'image'
+];
     
      public function comboBookings() { 
          return $this->hasMany(ComboBooking::class); }

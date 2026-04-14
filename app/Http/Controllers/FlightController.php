@@ -10,9 +10,32 @@ class FlightController extends Controller
 {
     // Show flight search form
     public function index()
-    {
-        return view('flight');
-    }
+{
+    // List of available destinations (city name => airport code)
+    $destinations = [
+        'Kuala Lumpur' => 'KUL',
+        'Penang'       => 'PEN',
+        'Langkawi'     => 'LGK',
+        'Bangkok'      => 'BKK',
+        'Singapore'    => 'SIN',
+        'Bali'         => 'DPS',
+        'Tokyo'        => 'NRT',
+        'Paris'        => 'CDG',
+        'Hong Kong'    => 'HKG',
+        'Maldives'     => 'MLE',
+        'Johor Bahru'  => 'JHB',
+        'Guangzhou'    => 'CAN',
+        'Shanghai'     => 'PVG',
+        'Chongqing'    => 'CKG',
+        'Vietnam'      => 'HAN',
+        'South Korea'  => 'ICN',
+        'Hokkaido'     => 'CTS',
+        'Chiang Mai'   => 'CNX',
+        'Sabah'        => 'BKI',
+    ];
+
+    return view('flight', compact('destinations'));
+}
     
 
     // Handle flight search (oneway, round, multi-city)
@@ -119,6 +142,8 @@ class FlightController extends Controller
             'infants'  => (int) ($request->infants ?? 0),
             'class'    => $request->class,
         ];
+
+        session(['search_params' => $searchParams]);
 
         // ---- Multi-city handling ----
         if ($tripType === 'multi') {

@@ -188,11 +188,4 @@ class BookingController extends Controller
         $booking->update(['status' => 'cancelled']);
         return redirect()->route('booking.index')->with('success', 'Booking cancelled.');
     }
-
-    // DELETE: Actually remove booking (soft delete alternative)
-    public function destroy(Booking $booking) {
-        $this->authorize('delete', $booking);
-        $booking->delete(); // or forceDelete()
-        return redirect()->route('booking.index')->with('success', 'Booking deleted.');
-    }
 }

@@ -76,10 +76,6 @@
             background: #f0ad4e;
             color: white;
         }
-        .btn-danger {
-            background: #d9534f;
-            color: white;
-        }
         .btn-secondary {
             background: #6c757d;
             color: white;
@@ -147,7 +143,7 @@
                 <p><strong>Booked on:</strong> {{ \Carbon\Carbon::parse($booking->booking_date)->format('d M Y, H:i') }}</p>
             </div>
 
-            <!-- Actions -->
+            <!-- Actions – only Cancel if not already cancelled -->
             <div class="action-buttons">
                 @if($booking->status != 'cancelled')
                     <form action="{{ route('booking.cancel', $booking) }}" method="POST" style="display: inline-block;">
@@ -156,12 +152,6 @@
                         <button type="submit" class="btn btn-warning" onclick="return confirm('Cancel this booking?')">Cancel Booking</button>
                     </form>
                 @endif
-
-                <form action="{{ route('booking.destroy', $booking) }}" method="POST" style="display: inline-block;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Permanently delete this booking? This cannot be undone.')">Delete Permanently</button>
-                </form>
 
                 <a href="{{ route('booking.index') }}" class="btn btn-secondary">Back to My Bookings</a>
             </div>

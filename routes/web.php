@@ -5,6 +5,8 @@ use App\Http\Controllers\FlightController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ComboController;
+use App\Http\Controllers\HotelController;
+
 
 // Guest routes (no login needed)
 Route::get('/login', [UserController::class, 'showLoginForm'])->name('login');
@@ -50,12 +52,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/booking/{booking}', [BookingController::class, 'show'])->name('booking.show');
     Route::patch('/booking/{booking}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
     Route::delete('/booking/{booking}', [BookingController::class, 'destroy'])->name('booking.destroy');
+    
+        // ========== COMBO ROUTES ==========
+        Route::get('/combo', [ComboController::class, 'index'])->name('combo.index');
+        Route::post('/combo/search', [ComboController::class, 'search'])->name('combo.search');
+        Route::post('/combo/book', [ComboController::class, 'book'])->name('combo.book');
+        Route::get('/combo/my-bookings', [ComboController::class, 'myBookings'])->name('combo.my-bookings');
+        
+        // !!! IMPORTANT: Passenger routes MUST come before any route with {parameter} !!!
+        Route::get('/combo/passengers', [ComboController::class, 'showPassengerForm'])->name('combo.passengers');
+        Route::post('/combo/passengers', [ComboController::class, 'processPassengers'])->name('combo.processPassengers');
+        
+        // Wildcard route (parameter) MUST be LAST
+        Route::get('/combo/{comboBooking}', [ComboController::class, 'show'])->name('combo.show');
+        Route::patch('/combo/{comboBooking}/cancel', [ComboController::class, 'cancel'])->name('combo.cancel');
 
-    // ========== COMBO ROUTES ==========
-    Route::get('/combo', [ComboController::class, 'index'])->name('combo.index');
-    Route::post('/combo/search', [ComboController::class, 'search'])->name('combo.search');
-    Route::post('/combo/book', [ComboController::class, 'book'])->name('combo.book');
-    Route::get('/combo/my-bookings', [ComboController::class, 'myBookings'])->name('combo.my-bookings');
-    Route::get('/combo/{comboBooking}', [ComboController::class, 'show'])->name('combo.show');
-    Route::patch('/combo/{comboBooking}/cancel', [ComboController::class, 'cancel'])->name('combo.cancel');
-});
+        // Hotel routes (public or auth – your choice)
+        Route::get('/hotels', [App\Http\Controllers\HotelController::class, 'index'])->name('hotels.index');
+        Route::get('/hotels/{hotel}', [App\Http\Controllers\HotelController::class, 'show'])->name('hotels.show');
+    
+    });

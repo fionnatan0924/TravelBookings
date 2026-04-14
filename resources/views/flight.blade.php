@@ -350,24 +350,32 @@
             </div>
 
             <div id="standardFields">
-                <div class="input-row">
-                    <div class="field">
-                        <label><i class="fa-solid fa-location-dot"></i> From</label>
-                        <div class="input-icon">
-                            <i class="fa-solid fa-city"></i>
-                            <input type="text" name="from" id="originInput" placeholder="New York (JFK)" autocomplete="off">
-                        </div>
-                        <div class="error-message" id="originError"></div>
-                    </div>
-                    <div class="field">
-                        <label><i class="fa-solid fa-location-arrow"></i> To</label>
-                        <div class="input-icon">
-                            <i class="fa-solid fa-map-pin"></i>
-                            <input type="text" name="to" id="destInput" placeholder="London (LHR)" autocomplete="off">
-                        </div>
-                        <div class="error-message" id="destError"></div>
-                    </div>
-                </div>
+            <div class="field">
+    <label><i class="fa-solid fa-location-dot"></i> From</label>
+    <div class="input-icon">
+        <i class="fa-solid fa-city"></i>
+        <select name="from" id="originInput" class="destination-select">
+            <option value="">Select departure city</option>
+            @foreach($destinations as $city => $code)
+                <option value="{{ $code }}">{{ $city }} ({{ $code }})</option>
+            @endforeach
+        </select>
+    </div>
+    <div class="error-message" id="originError"></div>
+</div>
+<div class="field">
+    <label><i class="fa-solid fa-location-arrow"></i> To</label>
+    <div class="input-icon">
+        <i class="fa-solid fa-map-pin"></i>
+        <select name="to" id="destInput" class="destination-select">
+            <option value="">Select arrival city</option>
+            @foreach($destinations as $city => $code)
+                <option value="{{ $code }}">{{ $city }} ({{ $code }})</option>
+            @endforeach
+        </select>
+    </div>
+    <div class="error-message" id="destError"></div>
+</div>
                 <div class="input-row">
                     <div class="field">
                         <label><i class="fa-regular fa-calendar"></i> Departure</label>
