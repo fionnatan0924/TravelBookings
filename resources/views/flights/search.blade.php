@@ -1,43 +1,50 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Flight Search</title>
-</head>
-<body>
+@extends('app')
 
-<h2>Flight Search</h2>
+@section('content')
+<div class="container" style="max-width: 800px; margin: 60px auto;">
+    <h1 style="font-size: 32px; font-weight: 500; margin-bottom: 8px;">Search flights</h1>
+    <p style="color: #666; margin-bottom: 32px;">Find the best rates for your next trip.</p>
 
-@if ($errors->any())
-    <div style="color:red;">
-        @foreach ($errors->all() as $error)
-            <p>{{ $error }}</p>
-        @endforeach
-    </div>
-@endif
+    @if ($errors->any())
+        <div style="background: #fef2f2; border-left: 3px solid #dc2626; padding: 16px; margin-bottom: 24px;">
+            @foreach ($errors->all() as $error)
+                <p style="color: #991b1b;">{{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
 
-<form method="POST" action="/flights/search">
-    @csrf
-
-    <label>From:</label><br>
-    <input type="text" name="from" value="{{ old('from') }}"><br><br>
-
-    <label>To:</label><br>
-    <input type="text" name="to" value="{{ old('to') }}"><br><br>
-
-    <label>Date:</label><br>
-    <input type="date" name="departure_date" value="{{ old('departure_date') }}"><br><br>
-
-    <label>Passengers:</label><br>
-    <input type="number" name="passengers" min="1" value="{{ old('passengers') }}"><br><br>
-
-    <label>Sort By:</label><br>
-    <select name="sort">
-        <option value="price">Price</option>
-        <option value="departure_time">Time</option>
-    </select><br><br>
-
-    <button type="submit">Search</button>
-</form>
-
-</body>
-</html>
+    <form method="POST" action="{{ route('flights.search') }}" style="background: white; padding: 32px; border-radius: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.05);">
+        @csrf
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label style="display: block; font-size: 13px; margin-bottom: 6px;">From</label>
+                    <input type="text" name="from" value="{{ old('from') }}" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; margin-bottom: 6px;">To</label>
+                    <input type="text" name="to" value="{{ old('to') }}" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px;">
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label style="display: block; font-size: 13px; margin-bottom: 6px;">Departure date</label>
+                    <input type="date" name="departure_date" value="{{ old('departure_date') }}" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; margin-bottom: 6px;">Passengers</label>
+                    <input type="number" name="passengers" min="1" value="{{ old('passengers',1) }}" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px;">
+                </div>
+            </div>
+            <div>
+                <label style="display: block; font-size: 13px; margin-bottom: 6px;">Sort by</label>
+                <select name="sort" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px;">
+                    <option value="price">Price (lowest first)</option>
+                    <option value="departure_time">Departure time</option>
+                </select>
+            </div>
+            <button type="submit" style="background: #1a1a1a; color: white; padding: 14px; border: none; border-radius: 40px; font-weight: 500; cursor: pointer;">Search flights</button>
+        </div>
+    </form>
+</div>
+@endsection

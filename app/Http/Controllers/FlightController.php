@@ -9,7 +9,7 @@ class FlightController extends Controller
 {
     public function index()
     {
-        return view('flights.search'); // this view must exist
+        return view('flights.search');
     }
 
     public function search(Request $request)
@@ -21,11 +21,18 @@ class FlightController extends Controller
             'passengers' => 'required|integer|min:1'
         ]);
 
-        $flights = Flight::where('from', $request->from)
+        $query = Flight::where('from', $request->from)
             ->where('to', $request->to)
             ->where('departure_date', $request->departure_date)
-            ->where('available_seats', '>=', $request->passengers)
-            ->get();
+            ->where('available_seats', '>=', $request->passengers);
+
+        if ($request->sort == 'price') {
+            $query->orderBy('price', 'asc');
+        } elseif ($request->sort == 'departure_time') {
+            $query->orderBy('departure_time', 'asc');
+        }
+
+        $flights = $query->paginate(10);
 
         return view('flights.results', compact('flights'));
     }

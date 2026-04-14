@@ -2,21 +2,25 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FlightController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PackageController;
+use App\Http\Controllers\DestinationController;
+use App\Http\Controllers\AttractionController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+Route::resource('attractions', AttractionController::class)->only(['index', 'show']);
+Route::get('/attractions/search', [AttractionController::class, 'search'])->name('attractions.search');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Home
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::get('flights',[FlightController::class, 'flights']);
-Route::post('flights/search',[FlightController::class, 'search']);
+// Destinations
+Route::get('/destinations', [DestinationController::class, 'index'])->name('destinations.index');
+Route::get('/destinations/{id}', [DestinationController::class, 'show'])->name('destinations.show');
+
+Route::get('/combos', [PackageController::class, 'index'])->name('combos.index');
+Route::get('/combos/search', [PackageController::class, 'search'])->name('combos.search');
+Route::get('/combos/{id}', [PackageController::class, 'show'])->name('combos.show');
+
+// Flights
+Route::get('/flights', [FlightController::class, 'index'])->name('flights.index');
+Route::post('/flights/search', [FlightController::class, 'search'])->name('flights.search');
