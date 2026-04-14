@@ -12,7 +12,7 @@ Route::post('/login', [UserController::class, 'login']);
 Route::get('/signup', [UserController::class, 'showSignupForm'])->name('register');
 Route::post('/signup', [UserController::class, 'signup']);
 
-Route::get('/', [FlightController::class, 'index'])->name('home');
+Route::get('/', [FlightController::class, 'index'])->name('flights.index');
 Route::get('/flight', [FlightController::class, 'index'])->name('flights.search');
 Route::post('/flight/search', [FlightController::class, 'search'])->name('flights.results');
 
@@ -44,7 +44,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/booking/luggage', [BookingController::class, 'showLuggageForm'])->name('booking.luggage');
     Route::post('/booking/luggage', [BookingController::class, 'processLuggage'])->name('booking.process.luggage'); // note dot
     Route::get('/booking/passengers', [BookingController::class, 'showPassengerForm'])->name('booking.passengers');
-    Route::post('/booking/passengers', [BookingController::class, 'processPassengers'])->name('booking.processPassengers');
+    Route::post('/booking/passengers', [BookingController::class, 'processPassengers'])->name('booking.process.passengers');
     Route::get('/booking/confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
     Route::get('/bookings', [BookingController::class, 'index'])->name('booking.index');
     Route::get('/booking/{booking}', [BookingController::class, 'show'])->name('booking.show');
