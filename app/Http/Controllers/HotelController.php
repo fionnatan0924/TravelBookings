@@ -29,8 +29,9 @@ class HotelController extends Controller
     // Show single hotel details (optional)
     public function show(Hotel $hotel)
 {
-    // Decode gallery if stored as JSON
+    // Decode the gallery JSON string into an array
     $gallery = $hotel->gallery ? json_decode($hotel->gallery, true) : [];
+    
     return view('hotels.show', compact('hotel', 'gallery'));
 }
 }

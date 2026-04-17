@@ -8,9 +8,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
-        $this->call(UsersTableSeeder::class);      // if you have one
+        $this->call(UsersTableSeeder::class);      
         $this->call(FlightsTableSeeder::class);
         $this->call(HotelSeeder::class);
-        // Add other seeders as needed
     }
 }
