@@ -9,7 +9,8 @@ class FlightController extends Controller
 {
     public function index()
     {
-        return view('flights.search');
+        $destinations = \App\Models\Destination::orderBy('name', 'asc')->get();
+        return view('flights.search', compact('destinations'));
     }
 
     public function search(Request $request)

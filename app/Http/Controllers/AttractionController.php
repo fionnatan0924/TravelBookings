@@ -55,9 +55,6 @@ class AttractionController extends Controller
         $attractions = $query->paginate(12)->withQueryString();
         $destinations = Destination::all();
 
-        // Store search filters in session (assignment requirement #7)
-        session(['last_attraction_search' => $request->all()]);
-
         return view('attractions.index', compact('attractions', 'destinations'));
     }
 

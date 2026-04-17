@@ -7,7 +7,7 @@
         @foreach($destinations as $dest)
         <a href="{{ route('destinations.show', $dest->id) }}" style="text-decoration: none; color: inherit;">
             <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <div style="height: 160px; background: url('{{ $dest->image_url ?? 'https://via.placeholder.com/280x160?text=No+Image' }}') center/cover;"></div>
+                <div style="height: 120px; background: url('{{ $dest->image_url ?? 'https://via.placeholder.com/280x160?text=No+Image' }}') center/cover;"></div>
                 <div style="padding: 20px;">
                     <h3>{{ $dest->name }}</h3>
                     <p style="color: #666;">{{ $dest->packages_count }} packages</p>

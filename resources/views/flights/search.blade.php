@@ -19,11 +19,16 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
                     <label style="display: block; font-size: 13px; margin-bottom: 6px;">From</label>
-                    <input type="text" name="from" value="{{ old('from') }}" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px;">
+                    <select name="from" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px;">
+                        <option value="">Select departure city</option>
+                        @foreach($destinations as $dest)
+                            <option value="{{ $dest->name }}" {{ old('from') == $dest->name ? 'selected' : '' }}>{{ $dest->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div>
                     <label style="display: block; font-size: 13px; margin-bottom: 6px;">To</label>
-                    <input type="text" name="to" value="{{ old('to') }}" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px;">
+                    <input type="text" name="to" value="{{ old('to', request('to')) }}" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px;">
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">

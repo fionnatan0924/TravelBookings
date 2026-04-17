@@ -2,21 +2,8 @@
 
 @section('content')
 <div class="container" style="margin: 60px auto;">
-    <h1 class="section-title" style="margin-bottom: 8px;">🎟️ Attractions</h1>
+    <h1 class="section-title" style="margin-bottom: 8px;">Attractions</h1>
     <p class="section-subtitle">Discover amazing experiences around the world</p>
-
-    {{-- Show last search from session --}}
-    @if(session('last_attraction_search') && count(session('last_attraction_search')) > 0)
-    <div style="background: #e8f0fe; border-left: 4px solid #1a1a1a; padding: 12px 20px; border-radius: 12px; margin-bottom: 24px;">
-        <strong>🔍 Last search:</strong> 
-        @foreach(session('last_attraction_search') as $key => $value)
-            @if($value && $key != '_token' && $key != 'page')
-                {{ ucfirst(str_replace('_', ' ', $key)) }}: {{ $value }} &nbsp;|&nbsp;
-            @endif
-        @endforeach
-        <a href="{{ route('attractions.index') }}" style="margin-left: 16px; color: #1a1a1a;">Clear</a>
-    </div>
-    @endif
 
     {{-- Search & Filter Form --}}
     <div style="background: white; border-radius: 20px; padding: 24px; margin-bottom: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
@@ -65,7 +52,7 @@
         @foreach($attractions as $att)
         <a href="{{ route('attractions.show', $att->id) }}" style="text-decoration: none; color: inherit;">
             <div class="card-hover" style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <div style="height: 160px; background: url('{{ $att->image_url ?? 'https://via.placeholder.com/400x250?text=No+Image' }}') center/cover;"></div>
+                <div style="height: 120px; background: url('{{ $att->image_url ?? 'https://via.placeholder.com/400x250?text=No+Image' }}') center/cover;"></div>
                 <div style="padding: 16px;">
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                         <span class="rating-star">★</span>
