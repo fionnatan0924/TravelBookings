@@ -113,6 +113,15 @@ class AttractionController extends Controller
     }
 
     /**
+     * Display the attraction booking page for ticket purchase.
+     */
+    public function book($id)
+    {
+        $attraction = Attraction::with('destination')->findOrFail($id);
+        return view('attractions.book', compact('attraction'));
+    }
+
+    /**
      * Show the form for editing an attraction (Admin only).
      */
     public function edit($id)

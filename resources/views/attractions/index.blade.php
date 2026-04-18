@@ -50,7 +50,7 @@
     @if($attractions->count())
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
         @foreach($attractions as $att)
-        <a href="{{ route('attractions.show', $att->id) }}" style="text-decoration: none; color: inherit;">
+        <a href="{{ route('attractions.book', $att->id) }}" style="text-decoration: none; color: inherit;">
             <div class="card-hover" style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <div style="height: 120px; background: url('{{ $att->image_url ?? 'https://via.placeholder.com/400x250?text=No+Image' }}') center/cover;"></div>
                 <div style="padding: 16px;">

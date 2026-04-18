@@ -160,6 +160,42 @@
     .attraction-group.active {
         display: block;
     }
+    .attraction-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);  
+    gap: 20px;
+}
+
+.attraction-card {
+    width: 100%;
+    
+}
+.attraction-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.attraction-card .card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.attraction-card .card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.attraction-card .button-primary {
+    width: 100%;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    display: block;
+    margin: 0 auto;
+}
+
 
     .destination-carousel {
         position: relative;
@@ -245,6 +281,9 @@
         .destination-item {
             width: 190px;
         }
+        .attraction-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
     }
 
     @media (max-width: 700px) {
@@ -260,6 +299,12 @@
             padding: 24px;
         }
     }
+    
+@media (max-width: 600px) {
+    .attraction-grid {
+        grid-template-columns: 1fr;
+    }
+}
     
 #destinationsCarousel::-webkit-scrollbar {
     display: none;
@@ -474,7 +519,7 @@
         <div class="attraction-filter">
             <label for="attraction-destination" style="font-weight: 600; color: #374151; margin-bottom: 0;">Filter by destination</label>
             <select id="attraction-destination" class="search-select">
-                @foreach($attractionsByDestination as $dest)
+                @foreach($destinations as $dest)
                     <option value="{{ $dest->id }}">{{ $dest->name }}</option>
                 @endforeach
             </select>
@@ -490,22 +535,31 @@
                         </div>
                         <a href="{{ route('destinations.show', $dest->id) }}" style="color: #111827; font-weight: 600; text-decoration: none;">Explore destination</a>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
-                        @foreach($dest->attractions as $attraction)
-                            <a href="{{ route('attractions.show', $attraction->id) }}" style="text-decoration: none; color: inherit;">
-                                <div class="card card-hover">
-                                    <div class="card-image" style="background-image: url('{{ $attraction->image_url ?? 'https://via.placeholder.com/400x250?text=No+Image' }}'); min-height: 120px;"></div>
-                                    <div class="card-content">
-                                        <div style="font-weight: 700; margin-bottom: 0.6rem;">{{ $attraction->name }}</div>
-                                        <div class="card-meta">{{ number_format($attraction->rating, 1) }} ★ · {{ $attraction->reviews }} reviews</div>
-                                        <div style="margin: 12px 0; font-size: 1rem; font-weight: 700;">RM {{ number_format($attraction->price, 2) }}</div>
-                                        <div style="color: #6b7280; font-size: 0.95rem; margin-bottom: 12px;">{{ $attraction->booking_text ?? 'Book your spot now' }}</div>
-                                        <button class="button button-primary" style="width: 100%;">View attraction</button>
-                                    </div>
-                                </div>
-                            </a>
-                        @endforeach
+
+                    @if($dest->attractions->count())
+                        <div class="attraction-grid">
+    @foreach($dest->attractions as $attraction)
+        <div class="attraction-card">
+            <a href="{{ route('attractions.book', $attraction->id) }}" style="text-decoration: none; color: inherit;">
+                <div class="card card-hover">
+                    <div class="card-image" style="background-image: url('{{ $attraction->image_url ?? 'https://via.placeholder.com/400x250?text=No+Image' }}'); min-height: 160px;"></div>
+                    <div class="card-content">
+                        <div style="font-weight: 700; margin-bottom: 0.6rem;">{{ $attraction->name }}</div>
+                        <div class="card-meta">{{ number_format($attraction->rating, 1) }} ★ · {{ $attraction->reviews }} reviews</div>
+                        <div style="margin: 12px 0; font-size: 1rem; font-weight: 700;">RM {{ number_format($attraction->price, 2) }}</div>
+                        <div style="color: #6b7280; font-size: 0.95rem; margin-bottom: 12px;">{{ $attraction->booking_text ?? 'Book your spot now' }}</div>
+                        <button class="button button-primary">View attraction</button>
                     </div>
+                </div>
+            </a>
+        </div>
+    @endforeach
+</div>
+                    @else
+                        <div style="background: #f9fafb; border-radius: 16px; padding: 32px; text-align: center;">
+                            <p>No active attractions in {{ $dest->name }} at the moment.</p>
+                        </div>
+                    @endif
                 </div>
             @endforeach
         @else
@@ -551,7 +605,7 @@
                                 <h3 style="font-size: 16px; margin-bottom: 4px; flex-grow: 1;">{{ $dest->name }}</h3>
                                 <p style="color: #666; font-size: 12px; margin-bottom: 0.75rem;">{{ $dest->packages_count }} combos</p>
                                 <p style="margin-bottom: 0.75rem; font-size: 14px; font-weight: 500;">from RM {{ number_format($dest->starting_price) }}</p>
-                                <a href="{{ url('/flights?to=' . urlencode($dest->name)) }}" class="button button-primary" style="width: 100%; padding: 6px 10px; font-size: 12px; text-align: center; margin-top: auto;">Search flight</a>
+                                <a href="{{ url('/flights?to=' . urlencode($dest->name)) }}" class="button button-primary" style="width: 100%; padding: 6px 10px; font-size: 14px; text-align: center; margin-top: auto;">Search flight</a>
                             </div>
                         </div>
                     </div>
@@ -571,7 +625,7 @@
 {{-- Testimonials --}}
 <section class="section-gap section-gap-light">
     <div class="container">
-        <div style="text-align: center; margin-bottom: 36px;">
+        <div style="text-align: left; margin-bottom: 36px;">
             <h2 class="section-title">What our travelers say</h2>
             <p class="section-subtitle">Real experiences from real people.</p>
         </div>
@@ -647,7 +701,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateAttractionGroups() {
         const selectedId = attractionSelect ? attractionSelect.value : null;
         attractionGroups.forEach(group => {
-            if (selectedId && group.dataset.destinationId === selectedId) {
+            if (selectedId && group.dataset.destinationId == selectedId) {
                 group.classList.add('active');
             } else {
                 group.classList.remove('active');

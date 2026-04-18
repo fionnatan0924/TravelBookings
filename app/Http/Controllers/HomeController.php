@@ -27,10 +27,12 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
-        // Get attractions grouped by destination (only destinations that have attractions)
-        $attractionsByDestination = Destination::with(['attractions' => function($q) {
-            $q->where('is_active', true)->take(6); // limit per destination
-        }])->has('attractions')->get();
+        // Load all active attractions and group them by destination manually
+$allAttractions = Attraction::where('is_active', true)->get();
+$attractionsByDestination = Destination::orderBy('name', 'asc')->get();
+foreach ($attractionsByDestination as $dest) {
+    $dest->attractions = $allAttractions->where('destination_id', $dest->id)->take(6);
+}
 
         return view('home', compact('destinations', 'packages', 'testimonials', 'attractionsByDestination'));
     }
