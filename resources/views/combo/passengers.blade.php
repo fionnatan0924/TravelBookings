@@ -99,7 +99,7 @@
                 </div>
             @endfor
 
-            <button type="submit">Confirm Combo Booking</button>
+            <button type="submit">Proceed to Payment <i class="fa-solid fa-credit-card"></i></button>
         </form>
     </div>
 </div>

@@ -14,7 +14,7 @@ Route::post('/login', [UserController::class, 'login']);
 Route::get('/signup', [UserController::class, 'showSignupForm'])->name('register');
 Route::post('/signup', [UserController::class, 'signup']);
 
-Route::get('/', [FlightController::class, 'index'])->name('flights.index');
+Route::get('/flights', [FlightController::class, 'index'])->name('flights.index');
 Route::get('/flight', [FlightController::class, 'index'])->name('flights.search');
 Route::post('/flight/search', [FlightController::class, 'search'])->name('flights.results');
 
@@ -54,41 +54,39 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/booking/{booking}', [BookingController::class, 'destroy'])->name('booking.destroy');
     
         // ========== COMBO ROUTES ==========
-        Route::get('/combo', [ComboController::class, 'index'])->name('combo.index');
-        Route::post('/combo/search', [ComboController::class, 'search'])->name('combo.search');
-        Route::post('/combo/book', [ComboController::class, 'book'])->name('combo.book');
-        Route::get('/combo/my-bookings', [ComboController::class, 'myBookings'])->name('combo.my-bookings');
-        
-        // !!! IMPORTANT: Passenger routes MUST come before any route with {parameter} !!!
-        Route::get('/combo/passengers', [ComboController::class, 'showPassengerForm'])->name('combo.passengers');
-        Route::post('/combo/passengers', [ComboController::class, 'processPassengers'])->name('combo.processPassengers');
-        
+    Route::get('/combo', [ComboController::class, 'index'])->name('combo.index');
+    Route::post('/combo/search', [ComboController::class, 'search'])->name('combo.search');
+    Route::post('/combo/book', [ComboController::class, 'book'])->name('combo.book');
+    Route::get('/combo/my-bookings', [ComboController::class, 'myBookings'])->name('combo.my-bookings');
+
+        // Passenger routes (must come before wildcard)
+    Route::get('/combo/passengers', [ComboController::class, 'showPassengerForm'])->name('combo.passengers');
+    Route::post('/combo/passengers', [ComboController::class, 'processPassengers'])->name('combo.processPassengers');
+
+        // Payment routes (must also come before wildcard)
+    Route::get('/combo/payment', [App\Http\Controllers\PaymentController::class, 'comboPaymentForm'])->name('payment.combo.form');
+    Route::post('/combo/payment', [App\Http\Controllers\PaymentController::class, 'processComboPayment'])->name('payment.combo.process');
+
         // Wildcard route (parameter) MUST be LAST
-        Route::get('/combo/{comboBooking}', [ComboController::class, 'show'])->name('combo.show');
-        Route::patch('/combo/{comboBooking}/cancel', [ComboController::class, 'cancel'])->name('combo.cancel');
+    Route::get('/combo/{comboBooking}', [ComboController::class, 'show'])->name('combo.show');
+    Route::patch('/combo/{comboBooking}/cancel', [ComboController::class, 'cancel'])->name('combo.cancel');
 
-        // Hotel routes (public or auth – your choice)
-        Route::get('/hotels', [App\Http\Controllers\HotelController::class, 'index'])->name('hotels.index');
-        Route::get('/hotels/{hotel}', [App\Http\Controllers\HotelController::class, 'show'])->name('hotels.show');
-        // Hotel booking routes
-        Route::post('/hotel/{hotel}/book', [App\Http\Controllers\HotelBookingController::class, 'bookForm'])->name('hotel.book.form');
-        Route::get('/hotel/booking/confirm', [App\Http\Controllers\HotelBookingController::class, 'confirmBooking'])->name('hotel.booking.confirm');
-        Route::post('/hotel/booking/payment', [App\Http\Controllers\HotelBookingController::class, 'proceedToPayment'])->name('hotel.booking.payment');
-        Route::get('/hotel/payment', [App\Http\Controllers\HotelBookingController::class, 'paymentForm'])->name('payment.hotel.form');
-        Route::post('/hotel/payment', [App\Http\Controllers\HotelBookingController::class, 'processPayment'])->name('payment.hotel.process');
-        Route::get('/hotel/receipt/{hotelBooking}', [App\Http\Controllers\HotelBookingController::class, 'receipt'])->name('hotel.receipt');
-        Route::get('/hotel/my-bookings', [App\Http\Controllers\HotelBookingController::class, 'myBookings'])->name('hotel.my-bookings');
-        Route::patch('/hotel/booking/{hotelBooking}/cancel', [App\Http\Controllers\HotelBookingController::class, 'cancel'])->name('hotel.booking.cancel');
+    // Hotel routes (public or auth – your choice)
+    Route::get('/hotels', [App\Http\Controllers\HotelController::class, 'index'])->name('hotels.index');
+    Route::get('/hotels/{hotel}', [App\Http\Controllers\HotelController::class, 'show'])->name('hotels.show');
+    // Hotel booking routes
+    Route::post('/hotel/{hotel}/book', [App\Http\Controllers\HotelBookingController::class, 'bookForm'])->name('hotel.book.form');
+    Route::get('/hotel/booking/confirm', [App\Http\Controllers\HotelBookingController::class, 'confirmBooking'])->name('hotel.booking.confirm');
+    Route::post('/hotel/booking/payment', [App\Http\Controllers\HotelBookingController::class, 'proceedToPayment'])->name('hotel.booking.payment');
+    Route::get('/hotel/payment', [App\Http\Controllers\HotelBookingController::class, 'paymentForm'])->name('payment.hotel.form');
+    Route::post('/hotel/payment', [App\Http\Controllers\HotelBookingController::class, 'processPayment'])->name('payment.hotel.process');
+    Route::get('/hotel/receipt/{hotelBooking}', [App\Http\Controllers\HotelBookingController::class, 'receipt'])->name('hotel.receipt');
+    Route::get('/hotel/my-bookings', [App\Http\Controllers\HotelBookingController::class, 'myBookings'])->name('hotel.my-bookings');
+    Route::patch('/hotel/booking/{hotelBooking}/cancel', [App\Http\Controllers\HotelBookingController::class, 'cancel'])->name('hotel.booking.cancel');
 
-        // Flight payment routes
-Route::get('/flight/payment', [App\Http\Controllers\PaymentController::class, 'flightPaymentForm'])->name('payment.flight.form');
-Route::post('/flight/payment', [App\Http\Controllers\PaymentController::class, 'processFlightPayment'])->name('payment.flight.process');
+    // Flight payment routes
+    Route::get('/flight/payment', [App\Http\Controllers\PaymentController::class, 'flightPaymentForm'])->name('payment.flight.form');
+    Route::post('/flight/payment', [App\Http\Controllers\PaymentController::class, 'processFlightPayment'])->name('payment.flight.process');
 
-// Hotel payment routes
-Route::get('/hotel/payment', [App\Http\Controllers\PaymentController::class, 'hotelPaymentForm'])->name('payment.hotel.form');
-Route::post('/hotel/payment', [App\Http\Controllers\PaymentController::class, 'processHotelPayment'])->name('payment.hotel.process');
-
-// Combo payment routes
-Route::get('/combo/payment', [App\Http\Controllers\PaymentController::class, 'comboPaymentForm'])->name('payment.combo.form');
-Route::post('/combo/payment', [App\Http\Controllers\PaymentController::class, 'processComboPayment'])->name('payment.combo.process');
+    Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     });

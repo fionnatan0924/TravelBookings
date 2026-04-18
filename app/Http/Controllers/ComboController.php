@@ -16,12 +16,41 @@ class ComboController extends Controller
         $this->middleware('auth');
     }
 
-    // Show combo search form
+    // Show combo search form with city names in dropdown
     public function index()
     {
         $airports = Flight::select('origin')->distinct()->pluck('origin')->toArray();
         sort($airports);
-        $airportOptions = array_combine($airports, $airports);
+
+        // Map airport code to city name
+        $codeToCity = [
+            'KUL' => 'Kuala Lumpur',
+            'PEN' => 'Penang',
+            'LGK' => 'Langkawi',
+            'JHB' => 'Johor Bahru',
+            'BKI' => 'Sabah',
+            'SIN' => 'Singapore',
+            'BKK' => 'Bangkok',
+            'CNX' => 'Chiang Mai',
+            'DPS' => 'Bali',
+            'NRT' => 'Tokyo',
+            'CTS' => 'Hokkaido',
+            'CDG' => 'Paris',
+            'HKG' => 'Hong Kong',
+            'MLE' => 'Maldives',
+            'CAN' => 'Guangzhou',
+            'PVG' => 'Shanghai',
+            'CKG' => 'Chongqing',
+            'HAN' => 'Hanoi',
+            'ICN' => 'Seoul',
+            'KEF' => 'Reykjavik',
+        ];
+
+        $airportOptions = [];
+        foreach ($airports as $code) {
+            $airportOptions[$code] = $codeToCity[$code] ?? $code;
+        }
+
         return view('combo.search', compact('airportOptions'));
     }
 
@@ -36,12 +65,38 @@ class ComboController extends Controller
             'guests' => 'required|integer|min:1|max:10',
         ]);
 
+        // Find flights (airport codes directly)
         $flights = Flight::where('origin', $validated['origin'])
             ->where('destination', $validated['destination'])
             ->whereDate('departure_date', $validated['departure_date'])
             ->get();
 
-        $hotels = Hotel::where('city', 'LIKE', '%'.$validated['destination'].'%')->get();
+        // Map destination airport code to city name for hotel search
+        $codeToCity = [
+            'KUL' => 'Kuala Lumpur',
+            'PEN' => 'Penang',
+            'LGK' => 'Langkawi',
+            'JHB' => 'Johor Bahru',
+            'BKI' => 'Sabah',
+            'SIN' => 'Singapore',
+            'BKK' => 'Bangkok',
+            'CNX' => 'Chiang Mai',
+            'DPS' => 'Bali',
+            'NRT' => 'Tokyo',
+            'CTS' => 'Hokkaido',
+            'CDG' => 'Paris',
+            'HKG' => 'Hong Kong',
+            'MLE' => 'Maldives',
+            'CAN' => 'Guangzhou',
+            'PVG' => 'Shanghai',
+            'CKG' => 'Chongqing',
+            'HAN' => 'Hanoi',
+            'ICN' => 'Seoul',
+            'KEF' => 'Reykjavik',
+        ];
+
+        $destinationCity = $codeToCity[$validated['destination']] ?? $validated['destination'];
+        $hotels = Hotel::where('city', 'LIKE', '%'.$destinationCity.'%')->get();
 
         if ($flights->isEmpty() || $hotels->isEmpty()) {
             return back()->with('error', 'No combos available for your criteria.');
@@ -51,46 +106,43 @@ class ComboController extends Controller
         return view('combo.results', compact('flights', 'hotels', 'validated'));
     }
 
-   // Book a specific combo (after user selects flight & hotel on results page)
-public function book(Request $request)
-{
-    $validated = $request->validate([
-        'flight_id' => 'required|exists:flights,id',
-        'hotel_id' => 'required|exists:hotels,id',
-    ]);
+    // Book a specific combo (after user selects flight & hotel on results page)
+    public function book(Request $request)
+    {
+        $validated = $request->validate([
+            'flight_id' => 'required|exists:flights,id',
+            'hotel_id' => 'required|exists:hotels,id',
+        ]);
 
-    $search = session('combo_search');
-    if (!$search) {
-        return redirect()->route('combo.index')->with('error', 'Please search again.');
+        $search = session('combo_search');
+        if (!$search) {
+            return redirect()->route('combo.index')->with('error', 'Please search again.');
+        }
+
+        session(['combo_selection' => [
+            'flight_id' => $validated['flight_id'],
+            'hotel_id'  => $validated['hotel_id'],
+            'search'    => $search,
+        ]]);
+
+        return redirect()->route('combo.passengers');
     }
 
-    // Store the selected flight & hotel in session for passenger form
-    session(['combo_selection' => [
-        'flight_id' => $validated['flight_id'],
-        'hotel_id'  => $validated['hotel_id'],
-        'search'    => $search, // original search parameters (dates, guests, etc.)
-    ]]);
-
-    // Redirect to passenger information form
-    return redirect()->route('combo.passengers');
-}
-
-    // Show passenger information form (copy of flight version)
-public function showPassengerForm()
-{
-    $selection = session('combo_selection');
-    if (!$selection) {
-        return redirect()->route('combo.index')->with('error', 'Please select a combo first.');
+    // Show passenger information form
+    public function showPassengerForm()
+    {
+        $selection = session('combo_selection');
+        if (!$selection) {
+            return redirect()->route('combo.index')->with('error', 'Please select a combo first.');
+        }
+        $adults = $selection['search']['guests'];
+        $children = 0;
+        $infants = 0;
+        return view('combo.passengers', compact('adults', 'children', 'infants'));
     }
-    // All guests are treated as adults for simplicity (you can extend to children/infants later)
-    $adults = $selection['search']['guests'];
-    $children = 0;
-    $infants = 0;
-    return view('combo.passengers', compact('adults', 'children', 'infants'));
-}
 
-// Process passenger details and create combo booking (copy of flight version)
-public function processPassengers(Request $request)
+    // Process passenger details and create combo booking
+    public function processPassengers(Request $request)
 {
     $selection = session('combo_selection');
     if (!$selection) {
@@ -107,48 +159,41 @@ public function processPassengers(Request $request)
     }
     $validated = $request->validate($rules);
 
-    $flight = Flight::find($selection['flight_id']);
-    $hotel = Hotel::find($selection['hotel_id']);
-    $search = $selection['search'];
-
-    $nights = (new \DateTime($search['check_in']))->diff(new \DateTime($search['check_out']))->days;
-    $totalFlight = $flight->price * $adults;
-    $totalHotel = $hotel->price_per_night * $nights;
-    $totalPrice = $totalFlight + $totalHotel;
-
-    // Create combo booking
-    $comboBooking = ComboBooking::create([
-        'user_id' => Auth::id(),
-        'flight_id' => $flight->id,
-        'hotel_id' => $hotel->id,
-        'check_in_date' => $search['check_in'],
-        'check_out_date' => $search['check_out'],
-        'guests' => $adults,
-        'total_price' => $totalPrice,
-        'booking_reference' => strtoupper(Str::random(10)),
-        'status' => 'confirmed',
-    ]);
-
-    // Save passengers (using ComboPassenger model)
+    // Collect passenger data
+    $passengers = [];
     for ($i = 1; $i <= $adults; $i++) {
-        \App\Models\ComboPassenger::create([
-            'combo_booking_id' => $comboBooking->id,
+        $passengers[] = [
             'type' => 'adult',
             'full_name' => $validated["adult_{$i}"]['full_name'],
             'dob' => $validated["adult_{$i}"]['dob'],
             'nationality' => $validated["adult_{$i}"]['nationality'],
             'passport_number' => $validated["adult_{$i}"]['passport'],
-        ]);
+        ];
     }
+
+    // Store pending combo booking in session
+    session(['pending_combo_booking' => [
+        'flight_id' => $selection['flight_id'],
+        'hotel_id'  => $selection['hotel_id'],
+        'check_in_date'  => $selection['search']['check_in'],
+        'check_out_date' => $selection['search']['check_out'],
+        'guests'    => $adults,
+        'passengers'=> $passengers,
+        'total_price'=> $selection['search']['guests'] * Flight::find($selection['flight_id'])->price
+                      + Hotel::find($selection['hotel_id'])->price_per_night
+                      * (new \DateTime($selection['search']['check_in']))->diff(new \DateTime($selection['search']['check_out']))->days,
+    ]]);
 
     session()->forget('combo_selection');
     session()->forget('combo_search');
-    return redirect()->route('combo.show', $comboBooking->id)->with('success', 'Combo booked!');
+
+    return redirect()->route('payment.combo.form');
 }
+
     // List user's combo bookings
     public function myBookings() {
         $bookings = Auth::user()->comboBookings()->with(['flight', 'hotel'])->latest()->get();
-        return view('combo.my_bookings', compact('bookings'));
+        return view('my_bookings', compact('bookings'));
     }
 
     // Show single combo booking

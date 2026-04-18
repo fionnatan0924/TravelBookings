@@ -18,26 +18,41 @@ class BookingController extends Controller
     }
 
     // Step 1: Store selected flight in session (temporary)
-    public function selectFlight(Request $request) {
+    public function selectFlight(Request $request)
+{
+    $request->validate([
+        'trip_type' => 'required|in:oneway,round,multi',
+    ]);
+
+    $booking = session('booking', []);
+
+    if ($request->trip_type == 'round') {
+        // Round trip: both flights come from the form
+        $request->validate([
+            'outbound_flight_id' => 'required|exists:flights,id',
+            'return_flight_id'   => 'required|exists:flights,id',
+        ]);
+        $booking['outbound_flight_id'] = $request->outbound_flight_id;
+        $booking['return_flight_id']   = $request->return_flight_id;
+    } else {
+        // One-way or multi-city: single flight selection
         $request->validate([
             'flight_id' => 'required|exists:flights,id',
-            'trip_type' => 'required|in:oneway,round,multi',
             'flight_type' => 'required|in:outbound,return',
         ]);
-
         $flight = Flight::findOrFail($request->flight_id);
-        $booking = session('booking', []);
-        
         if ($request->flight_type == 'outbound') {
             $booking['outbound_flight_id'] = $flight->id;
         } else {
             $booking['return_flight_id'] = $flight->id;
         }
-        $booking['trip_type'] = $request->trip_type;
-        session(['booking' => $booking]);
-
-        return redirect()->route('booking.luggage');
     }
+
+    $booking['trip_type'] = $request->trip_type;
+    session(['booking' => $booking]);
+
+    return redirect()->route('booking.luggage');
+}
 
     // Step 2: Show luggage form
     public function showLuggageForm() {

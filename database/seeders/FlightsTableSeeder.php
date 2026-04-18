@@ -12,32 +12,34 @@ class FlightsTableSeeder extends Seeder
     {
         DB::table('flights')->truncate();
 
-        // Airport codes (IATA) for 20 destinations
+        // Airport codes for the 20 destinations (IATA)
         $airports = [
-            'KUL' => 'Kuala Lumpur',
-            'PEN' => 'Penang',
-            'LGK' => 'Langkawi',
-            'BKK' => 'Bangkok',
-            'SIN' => 'Singapore',
-            'DPS' => 'Bali',
-            'NRT' => 'Tokyo',
-            'CDG' => 'Paris',
-            'HKG' => 'Hong Kong',
-            'MLE' => 'Maldives',
-            'JHB' => 'Johor Bahru',
-            'CAN' => 'Guangzhou',
-            'PVG' => 'Shanghai',
-            'CKG' => 'Chongqing',
-            'HAN' => 'Vietnam (Hanoi)',
-            'ICN' => 'South Korea (Seoul)',
-            'CTS' => 'Hokkaido (Sapporo)',
-            'CNX' => 'Chiang Mai',
-            'BKI' => 'Sabah (Kota Kinabalu)',
+            'Kuala Lumpur' => 'KUL',
+            'Penang'       => 'PEN',
+            'Langkawi'     => 'LGK',
+            'Bangkok'      => 'BKK',
+            'Singapore'    => 'SIN',
+            'Bali'         => 'DPS',
+            'Tokyo'        => 'NRT',
+            'Paris'        => 'CDG',
+            'Hong Kong'    => 'HKG',
+            'Maldives'     => 'MLE',
+            'Johor Bahru'  => 'JHB',
+            'Guangzhou'    => 'CAN',
+            'Shanghai'     => 'PVG',
+            'Chongqing'    => 'CKG',
+            'Vietnam'      => 'HAN',
+            'South Korea'  => 'ICN',
+            'Iceland'      => 'KEF',
+            'Hokkaido'     => 'CTS',
+            'Chiang Mai'   => 'CNX',
+            'Sabah'        => 'BKI',
         ];
 
-        // Generate all possible routes (origin != destination)
-        $airportCodes = array_keys($airports);
+        $airportCodes = array_values($airports);
         $routes = [];
+
+        // Generate all possible routes (origin != destination)
         foreach ($airportCodes as $origin) {
             foreach ($airportCodes as $dest) {
                 if ($origin !== $dest) {
@@ -46,74 +48,58 @@ class FlightsTableSeeder extends Seeder
             }
         }
 
-        // Durations (approximate flight times in hours:minutes)
-        // We'll define a helper function to estimate duration based on distance categories
-        // For simplicity, we'll use a lookup array for common pairs; for others, calculate based on typical flight times.
-        // But to keep it manageable, we'll manually define durations for all routes? That's 380 routes.
-        // Instead, we'll generate dynamically using distance categories.
-
-        // Base durations between regions (in minutes) – you can refine later
-        $durationsMinutes = [];
-        foreach ($routes as $route) {
-            $origin = $route['origin'];
-            $dest = $route['destination'];
-
-            // Categorise airports by region
+        // Helper to get region for duration/price estimation
+        $regionOf = function($code) {
             $regions = [
-                'SEA' => ['KUL', 'PEN', 'LGK', 'SIN', 'JHB', 'BKI', 'DPS', 'CNX', 'BKK', 'HAN'], // South East Asia
-                'EA'  => ['HKG', 'CAN', 'PVG', 'CKG', 'ICN', 'NRT', 'CTS'], // East Asia
-                'SA'  => ['MLE'], // South Asia (Maldives)
-                'EU'  => ['CDG'], // Europe
+                'SEA' => ['KUL', 'PEN', 'LGK', 'JHB', 'BKI', 'SIN', 'BKK', 'DPS', 'CNX', 'HAN'],
+                'EA'  => ['CAN', 'PVG', 'CKG', 'HKG', 'ICN', 'NRT', 'CTS'],
+                'SA'  => ['MLE'],
+                'EU'  => ['CDG', 'KEF'],
             ];
+            foreach ($regions as $region => $codes) {
+                if (in_array($code, $codes)) return $region;
+            }
+            return 'SEA';
+        };
 
-            $regionOf = function($code) use ($regions) {
-                foreach ($regions as $region => $codes) {
-                    if (in_array($code, $codes)) return $region;
-                }
-                return 'SEA'; // default
-            };
+        // Durations in minutes between regions
+        $regionTimes = [
+            'SEA-SEA' => 90,   // 1.5h
+            'SEA-EA'  => 300,  // 5h
+            'SEA-SA'  => 270,  // 4.5h
+            'SEA-EU'  => 780,  // 13h
+            'EA-EA'   => 150,  // 2.5h
+            'EA-SA'   => 420,  // 7h
+            'EA-EU'   => 660,  // 11h
+            'SA-EU'   => 600,  // 10h
+            'SA-SA'   => 120,  // 2h
+            'EU-EU'   => 120,  // 2h
+        ];
 
-            $reg1 = $regionOf($origin);
-            $reg2 = $regionOf($dest);
-
-            // Define flight minutes between regions
-            $regionTimes = [
-                'SEA-SEA' => 90,   // 1.5h
-                'SEA-EA'  => 300,  // 5h
-                'SEA-SA'  => 270,  // 4.5h
-                'SEA-EU'  => 780,  // 13h
-                'EA-EA'   => 150,  // 2.5h
-                'EA-SA'   => 420,  // 7h
-                'EA-EU'   => 660,  // 11h
-                'SA-EU'   => 600,  // 10h
-                'SA-SA'   => 120,  // 2h
-                'EU-EU'   => 120,  // 2h (not used much)
-            ];
-
-            $key = $reg1 . '-' . $reg2;
-            $minutes = $regionTimes[$key] ?? 300; // default 5h
-            $durationsMinutes[$origin . '-' . $dest] = $minutes;
-        }
-
-        // Price ranges (economy, MYR) – we'll generate based on duration
+        // Store durations and price ranges per route
+        $durationsMinutes = [];
         $priceRanges = [];
         foreach ($routes as $route) {
             $origin = $route['origin'];
             $dest = $route['destination'];
-            $minutes = $durationsMinutes[$origin . '-' . $dest];
-            // Price roughly RM 1.5 per minute? adjust
+            $reg1 = $regionOf($origin);
+            $reg2 = $regionOf($dest);
+            $key = $reg1 . '-' . $reg2;
+            $minutes = $regionTimes[$key] ?? 300; // default 5h
+            $durationsMinutes[$origin . '-' . $dest] = $minutes;
+
+            // Price per adult (MYR) – roughly RM 1.5 per minute for economy
             $base = round($minutes * 1.2);
             $minPrice = max(80, $base - 50);
             $maxPrice = $base + 100;
             $priceRanges[$origin . '-' . $dest] = [$minPrice, $maxPrice];
         }
 
-        // Airlines list (mix of local and international)
         $airlines = [
             'Malaysia Airlines', 'AirAsia', 'Firefly', 'Batik Air', 'Scoot',
             'China Southern', 'Thai Airways', 'Singapore Airlines', 'Cathay Pacific',
             'Japan Airlines', 'Garuda Indonesia', 'Korean Air', 'EVA Air',
-            'Vietnam Airlines', 'Air France', 'Emirates', 'Qatar Airways'
+            'Vietnam Airlines', 'Air France', 'Emirates', 'Qatar Airways', 'Icelandair'
         ];
 
         $baggageMap = [
@@ -134,6 +120,7 @@ class FlightsTableSeeder extends Seeder
             'Air France' => 'Checked 23 kg',
             'Emirates' => 'Checked 30 kg',
             'Qatar Airways' => 'Checked 25 kg',
+            'Icelandair' => 'Checked 23 kg',
         ];
 
         $departureTimes = [
@@ -144,7 +131,7 @@ class FlightsTableSeeder extends Seeder
 
         $now = now();
         $startDate = Carbon::today();
-        $endDate = Carbon::today()->addDays(30);
+        $endDate = Carbon::today()->addDays(15);
         $flights = [];
 
         // Class configurations
@@ -159,11 +146,6 @@ class FlightsTableSeeder extends Seeder
             $origin = $route['origin'];
             $dest = $route['destination'];
             $routeKey = $origin . '-' . $dest;
-
-            if (!isset($durationsMinutes[$routeKey]) || !isset($priceRanges[$routeKey])) {
-                continue;
-            }
-
             $minutes = $durationsMinutes[$routeKey];
             $hours = floor($minutes / 60);
             $mins = $minutes % 60;
@@ -216,7 +198,7 @@ class FlightsTableSeeder extends Seeder
         }
 
         // Insert in chunks
-        $chunks = array_chunk($flights, 500);
+        $chunks = array_chunk($flights, 1000);
         foreach ($chunks as $chunk) {
             DB::table('flights')->insert($chunk);
         }
@@ -227,7 +209,6 @@ class FlightsTableSeeder extends Seeder
         $parts = explode(':', $time);
         $hours = (int)$parts[0];
         $minutes = (int)$parts[1];
-
         $totalMinutes = $hours * 60 + $minutes + $minutesToAdd;
         $newHours = floor($totalMinutes / 60) % 24;
         $newMinutes = $totalMinutes % 60;

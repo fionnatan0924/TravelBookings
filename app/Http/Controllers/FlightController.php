@@ -191,9 +191,6 @@ class FlightController extends Controller
 
         $outboundFlights = $query->get();
 
-        // If no flights found, try a fallback: ignore class or date? 
-        // But we'll just show a friendly message (already handled in view)
-
         $returnFlights = null;
         if ($tripType === 'round') {
             $returnQuery = Flight::where('origin', $toCode)
