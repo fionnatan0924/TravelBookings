@@ -14,6 +14,26 @@ class UserController extends Controller
         return view('login');
     }
 
+public function updatePassword(Request $request)
+{
+    $request->validate([
+        'current_password' => 'required',
+        'password' => 'required|min:8|confirmed',
+    ]);
+
+    $user = Auth::user();
+
+    if (!Hash::check($request->current_password, $user->password)) {
+        return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+    }
+
+    $user->update([
+        'password' => Hash::make($request->password),
+    ]);
+
+    return back()->with('success', 'Password changed successfully.');
+}
+
     // Handle login
     public function login(Request $request) {
         $credentials = $request->validate([
@@ -94,6 +114,12 @@ class UserController extends Controller
         User::destroy($id);
         return back();
     }
+
+    public function profile()
+{
+    $user = Auth::user();
+    return view('profile', compact('user'));
+}
 
 
 public function myBookings()

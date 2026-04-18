@@ -1,216 +1,189 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Profile</title>
-    <style>
-        body {
-            font-family: Arial;
-            margin: 0;
-            background: #f5f5f5;
+@extends('layouts.app')
+
+@section('title', 'My Profile')
+
+@section('content')
+<style>
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+    @media (max-width: 900px) {
+        .profile-grid {
+            grid-template-columns: 1fr;
         }
+    }
+    .profile-card, .settings-card {
+        background: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .profile-header {
+        background: linear-gradient(135deg, #1f3b4c, #2c6e9e);
+        padding: 2rem;
+        color: white;
+        text-align: center;
+    }
+    .avatar-large {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 3px solid white;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .profile-body {
+        padding: 2rem;
+    }
+    .info-row {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eef2f8;
+    }
+    .info-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #5b7e9c;
+    }
+    .info-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #1e2f3e;
+        margin-top: 0.2rem;
+    }
+    .settings-card {
+        padding: 2rem;
+    }
+    .settings-card h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        color: #1f3b4c;
+    }
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+    .form-group label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #5b7e9c;
+        margin-bottom: 0.3rem;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-family: 'Inter', sans-serif;
+    }
+    .btn-primary {
+        background: linear-gradient(105deg, #0f2b3d, #1f4b6e);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 40px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+    }
+    .btn-danger {
+        background: #e53e3e;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 40px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 1rem;
+    }
+    .password-section {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eef2f8;
+    }
+</style>
 
-        /* Header */
-        .header {
-            background: #222;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-        }
+<div class="container">
 
-        /* Banner */
-        .banner {
-            background: url('https://images.unsplash.com/photo-1561484930-998b6a7b22e8') center/cover;
-            height: 220px;
-            position: relative;
-        }
-
-        .banner-text {
-            color: white;
-            text-align: center;
-            padding-top: 80px;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        /* Wrapper */
-        .profile-wrapper {
-            position: relative;
-            margin-top: -80px;
-        }
-
-        /* Card */
-        .card {
-            max-width: 900px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 2;
-        }
-
-        /* Profile top */
-        .top {
-            display: flex;
-            align-items: center;
-        }
-
-        .avatar {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            margin-right: 20px;
-            border: 5px solid white;
-        }
-
-        h2 {
-            margin: 0;
-        }
-
-        /* Tabs */
-        .tabs {
-            margin-top: 25px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .tab {
-            padding: 10px 18px;
-            background: #eee;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .tab.active {
-            background: #007bff;
-            color: white;
-        }
-
-        /* Content */
-        .content {
-            margin-top: 25px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* Logout */
-        .logout {
-            float: right;
-        }
-
-        .logout button {
-            background: red;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-        }
-
-        .logout button:hover {
-            background: darkred;
-        }
-
-    </style>
-
-    <script>
-        function showTab(event, tab) {
-            document.getElementById('bookings').classList.add('hidden');
-            document.getElementById('settings').classList.add('hidden');
-
-            document.getElementById(tab).classList.remove('hidden');
-
-            let tabs = document.getElementsByClassName('tab');
-            for (let i = 0; i < tabs.length; i++) {
-                tabs[i].classList.remove('active');
-            }
-
-            event.target.classList.add('active');
-        }
-    </script>
-</head>
-<body>
-
-<!-- Header -->
-<div class="header">
-    <div><strong>TravelBooking</strong></div>
-    <div>Hi, {{ session('user')->name }}</div>
-</div>
-
-<!-- Banner -->
-<div class="banner">
-    <div class="banner-text">Explore Malaysia 🇲🇾</div>
-</div>
-
-<!-- Profile Wrapper -->
-<div class="profile-wrapper">
-
-    <div class="card">
-
-        @if(session('success'))
-            <div style="padding: 12px 16px; background: #e6ffed; color: #0f5132; border: 1px solid #c3e6cb; border-radius: 8px; margin-bottom: 16px;">
-                {{ session('success') }}
+    <div class="profile-grid">
+        <!-- LEFT COLUMN: Profile info -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <img src="https://ui-avatars.com/api/?background=2c6e9e&color=fff&name={{ urlencode(Auth::user()->name) }}&size=100" class="avatar-large" alt="Avatar">
+                <h2>{{ Auth::user()->name }}</h2>
+                <p>{{ Auth::user()->email }}</p>
+                <p><small>Member since {{ Auth::user()->created_at->format('d M Y') }}</small></p>
             </div>
-        @endif
+            <div class="profile-body">
+                <div class="info-row">
+                    <div class="info-label">Account Status</div>
+                    <div class="info-value"><span class="status-badge confirmed">Active</span></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Email Verified</div>
+                    <div class="info-value">{{ Auth::user()->email_verified_at ? 'Yes' : 'No' }}</div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Logout -->
-        <div class="logout">
-            <form action="/logout" method="POST">
+        <!-- RIGHT COLUMN: Settings (update profile + change password) -->
+        <div class="settings-card">
+            <h3><i class="fa-regular fa-user"></i> Account Settings</h3>
+            <form method="POST" action="{{ route('profile.update') }}">
                 @csrf
-                <button>Logout</button>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" value="{{ Auth::user()->name }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" value="{{ Auth::user()->email }}" required>
+                </div>
+                <button type="submit" class="btn-primary">Update Profile</button>
             </form>
-        </div>
 
-        <!-- Profile Info -->
-        <div class="top">
-            <img src="/images/default-avatar.png" class="avatar">
-
-            <div>
-                <h2>{{ session('user')->name }}</h2>
-                <p>{{ session('user')->email }}</p>
-            </div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-            <div class="tab active" onclick="showTab(event, 'bookings')">My Bookings</div>
-            <div class="tab" onclick="showTab(event, 'settings')">Account Settings</div>
-        </div>
-
-        <!-- Content -->
-        <div class="content">
-
-            <!-- BOOKINGS -->
-            <div id="bookings">
-                <h3>My Bookings</h3>
-                <p style="color: gray;">No bookings yet.</p>
-            </div>
-
-            <!-- SETTINGS -->
-            <div id="settings" class="hidden">
-                <h3>Update Profile</h3>
-
-                <form method="POST" action="/update-profile">
+            <div class="password-section">
+                <h3><i class="fa-regular fa-lock"></i> Change Password</h3>
+                <form method="POST" action="{{ route('profile.password') }}">
                     @csrf
-
-                    <input type="text" name="name" value="{{ session('user')->name }}">
-                    <br><br>
-
-                    <input type="email" name="email" value="{{ session('user')->email }}">
-                    <br><br>
-
-                    <button style="background:green;color:white;">Update</button>
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" name="current_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" name="password_confirmation" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Change Password</button>
                 </form>
             </div>
-
         </div>
-
     </div>
-
 </div>
 
-</body>
-</html>
+<style>
+    .status-badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    .status-badge.confirmed {
+        background: #d4edda;
+        color: #155724;
+    }
+</style>
+@endsection

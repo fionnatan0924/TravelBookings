@@ -7,82 +7,178 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f3f6fc;
-            padding: 2rem;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .card {
-            background: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-        .card-header {
-            background: #f8fafc;
-            padding: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .card-header h1 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.6rem;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 0.2rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        .status-badge.confirmed { background: #d4edda; color: #155724; }
-        .status-badge.cancelled { background: #f8d7da; color: #721c24; }
-        .card-body { padding: 1.5rem; }
-        .flight-details, .passengers-list, .price-summary {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eef2f8;
-        }
-        .flight-details h3, .passengers-list h3, .price-summary h3 {
-            color: #1f4b6e;
-            margin-bottom: 1rem;
-        }
-        .passenger-item {
-            background: #f9f9ff;
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-            border-radius: 8px;
-        }
-        .action-buttons {
-            margin-top: 2rem;
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .btn {
-            padding: 0.5rem 1.2rem;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            display: inline-block;
-        }
-        .btn-warning {
-            background: #f0ad4e;
-            color: white;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        .btn:hover {
-            opacity: 0.9;
-        }
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f5f7fc;
+    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.card {
+    background: white;
+    border-radius: 2rem;
+    box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8fafc, #ffffff);
+    padding: 1.8rem 2rem;
+    border-bottom: 1px solid #eff3f8;
+}
+
+.card-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1f3b4c;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.3px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 1rem;
+    border-radius: 40px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #eef2fa;
+    color: #2c5a7a;
+}
+.status-badge.confirmed {
+    background: #d4edda;
+    color: #155724;
+}
+.status-badge.cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.flight-details, .passengers-list, .price-summary {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.flight-details h3, .passengers-list h3, .price-summary h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f4b6e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flight-details p, .price-summary p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+    color: #2c5a7a;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+}
+
+.flight-details p strong, .price-summary p strong {
+    width: 140px;
+    font-weight: 600;
+    color: #1f3b4c;
+}
+
+.passenger-item {
+    background: #f8fafd;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.6rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    transition: 0.2s;
+    border: 1px solid #ecf3fa;
+}
+.passenger-item:hover {
+    background: #f0f4fa;
+    transform: translateX(4px);
+}
+
+.action-buttons {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-warning {
+    background: #f0ad4e;
+    color: white;
+}
+.btn-warning:hover {
+    background: #e08e0e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 680px) {
+    body {
+        padding: 1rem;
+    }
+    .card-header {
+        padding: 1.2rem;
+    }
+    .card-header h1 {
+        font-size: 1.4rem;
+    }
+    .card-body {
+        padding: 1.2rem;
+    }
+    .flight-details p strong {
+        width: 100%;
+        margin-bottom: 0.2rem;
+    }
+    .action-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .btn {
+        justify-content: center;
+    }
+}
     </style>
 </head>
 <body>

@@ -29,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
         return view('profile');
     })->name('profile');
     Route::post('/update-profile', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/password', [UserController::class, 'updatePassword'])->name('profile.password');
 
     // Admin routes (with role gate)
     Route::middleware(['can:admin'])->group(function () {

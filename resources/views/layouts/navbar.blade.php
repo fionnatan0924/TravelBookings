@@ -10,6 +10,7 @@
         <a href="{{ route('hotels.index') }}">Hotels</a>
         @auth
             <a href="{{ route('my-bookings') }}">My Bookings</a>
+            <a href="{{ route('profile') }}">Profile</a>
             <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                 @csrf
                 <button type="submit" style="background: none; border: none; color: #e53e3e; cursor: pointer;">Logout</button>
