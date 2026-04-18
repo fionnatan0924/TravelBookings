@@ -3,127 +3,160 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required'
-        ]);
-
-        $user = DB::table('users')
-            ->where('email', $request->email)
-            ->where('password', $request->password)
-            ->first();
-
-       if ($user) {
-
-    session(['user' => $user]);
-
-    if ($user->role == 'admin') {
-        return redirect('/admin/users');
-    } else {
-        return redirect('/profile'); 
+    // Show login form
+    public function showLoginForm() {
+        return view('login');
     }
 
-    } else {
-        return back()->withErrors(['Invalid email or password']);
-        }
-    }
-
-    public function signup(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-
-            'password' => [
-                'required',
-                'min:8',
-                'regex:/[a-z]/',
-                'regex:/[A-Z]/',
-                'regex:/[0-9]/',
-                'regex:/[@$!%*#?&]/',
-                'confirmed'
-            ],
-        ], [
-
-            'name.required' => 'Name is required.', //name
-
-            'email.required' => 'Email is required.',
-            'email.email' => 'Please enter a valid email address.', //email
-
-            'password.required' => 'Password is required.',
-            'password.min' => 'Password must be at least 8 characters.',
-            'password.regex' => 'Password must include uppercase, lowercase, number and symbol.',
-            'password.confirmed' => 'Passwords do not match.', //password
-        ]);
-
-        // insert data
-        DB::table('users')->insert([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password,
-            'role' => 'user'
-        ]);
-
-        return redirect('/login')->with('success', 'Account created!');
-    }
-
-    public function manageUsers()
-    {
-    $users = DB::table('users')->get();
-
-    return view('admin.users', compact('users'));
-    }
-
-    public function addUser(Request $request)
-    {
-    DB::table('users')->insert([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => $request->password,
-        'role' => $request->role
+public function updatePassword(Request $request)
+{
+    $request->validate([
+        'current_password' => 'required',
+        'password' => 'required|min:8|confirmed',
     ]);
 
-    return back()->with('success', 'User added!');
+    $user = Auth::user();
+
+    if (!Hash::check($request->current_password, $user->password)) {
+        return back()->withErrors(['current_password' => 'Current password is incorrect.']);
     }
 
-    public function updateUser(Request $request, $id)
-    {
-    DB::table('users')
-        ->where('id', $id)
-        ->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role
+    $user->update([
+        'password' => Hash::make($request->password),
+    ]);
+
+    return back()->with('success', 'Password changed successfully.');
+}
+
+    // Handle login
+    public function login(Request $request) {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-    return back()->with('success', 'User updated!');
+        if (Auth::attempt($credentials, $request->remember)) {
+            $request->session()->regenerate();
+            // Redirect based on role (optional)
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect()->intended('/');
+        }
+
+        return back()->withErrors(['email' => 'Invalid credentials.'])->onlyInput('email');
     }
 
-    public function deleteUser($id)
-    {
-    DB::table('users')->where('id', $id)->delete();
-
-    return back()->with('success', 'User deleted!');
+    // Show signup form
+    public function showSignupForm() {
+        return view('signup');
     }
 
-    public function updateProfile(Request $request)
-    {
-    DB::table('users')
-        ->where('id', session('user')->id)
-        ->update([
-            'name' => $request->name,
-            'email' => $request->email
+    // Handle signup
+    public function signup(Request $request) {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8|confirmed',
         ]);
 
-    $user = DB::table('users')->where('id', session('user')->id)->first();
-    session(['user' => $user]);
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'user', // default role
+        ]);
 
-    return back()->with('success', 'Profile updated!');
+        Auth::login($user);
+        return redirect('/');
     }
+
+    // Logout
+    public function logout(Request $request) {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/login');
+    }
+
+    // Profile update (optional)
+    public function updateProfile(Request $request) {
+        $user = Auth::user();
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,'.$user->id,
+        ]);
+        $user->update($validated);
+        return back()->with('success', 'Profile updated.');
+    }
+
+    // Admin methods
+    public function manageUsers() {
+        $users = User::all();
+        return view('admin.users', compact('users'));
+    }
+
+    public function addUser(Request $request) {
+        // validation and create
+    }
+
+    public function updateUser(Request $request, $id) {
+        // update logic
+    }
+
+    public function deleteUser($id) {
+        User::destroy($id);
+        return back();
+    }
+
+    public function profile()
+{
+    $user = Auth::user();
+    return view('profile', compact('user'));
+}
+
+
+public function myBookings()
+{
+    $user = Auth::user();
+
+    // Fetch all bookings
+    $flightBookings = $user->bookings()->with('outboundFlight')->latest()->get();
+    $comboBookings = $user->comboBookings()->with(['flight', 'hotel'])->latest()->get();
+    $hotelBookings = $user->hotelBookings()->with('hotel')->latest()->get();
+
+    $allBookings = collect();
+
+    foreach ($flightBookings as $booking) {
+        $booking->type = 'flight';
+        $booking->display_title = $booking->outboundFlight->origin . ' → ' . $booking->outboundFlight->destination;
+        $booking->display_date = $booking->booking_date;
+        $allBookings->push($booking);
+    }
+
+    foreach ($comboBookings as $booking) {
+        $booking->type = 'combo';
+        $booking->display_title = $booking->flight->origin . ' → ' . $booking->flight->destination . ' + ' . $booking->hotel->name;
+        $booking->display_date = $booking->created_at;
+        $allBookings->push($booking);
+    }
+
+    foreach ($hotelBookings as $booking) {
+        $booking->type = 'hotel';
+        $booking->display_title = $booking->hotel->name . ' (' . $booking->hotel->city . ')';
+        $booking->display_date = $booking->created_at;
+        $allBookings->push($booking);
+    }
+
+    // Sort by date (most recent first)
+    $allBookings = $allBookings->sortByDesc('display_date');
+
+    return view('my-bookings', compact('allBookings'));
+}
 }

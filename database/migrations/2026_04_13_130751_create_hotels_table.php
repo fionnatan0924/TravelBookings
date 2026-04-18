@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePersonalAccessTokensTable extends Migration
+class CreateHotelsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,14 @@ class CreatePersonalAccessTokensTable extends Migration
      */
     public function up()
     {
-        Schema::create('flights', function (Blueprint $table) {
+        Schema::create('hotels', function (Blueprint $table) {
             $table->id();
-            $table->string('from');
-            $table->string('to');
-            $table->date('departure_date');
-            $table->time('departure_time');
-            $table->decimal('price', 8, 2);
-            $table->integer('available_seats');
+            $table->string('name');
+            $table->string('city');
+            $table->string('address');
+            $table->decimal('price_per_night', 8, 2);
+            $table->integer('stars')->default(3);
+            $table->text('amenities')->nullable();
             $table->timestamps();
         });
     }
@@ -32,6 +32,6 @@ class CreatePersonalAccessTokensTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('personal_access_tokens');
+        Schema::dropIfExists('hotels');
     }
 }

@@ -3,68 +3,91 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FlightController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\ComboController;
+use App\Http\Controllers\HotelController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/login', function () { //login page
-    return view('login');
-});
-
-Route::get('/signup', function () { //signup page
-    return view('signup');
-});
-
-//form submit
+// Guest routes (no login needed)
+Route::get('/login', [UserController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [UserController::class, 'login']);
-Route::post('/signup', [UserController::class, 'signup']); 
+Route::get('/signup', [UserController::class, 'showSignupForm'])->name('register');
+Route::post('/signup', [UserController::class, 'signup']);
 
-//Admin
-Route::get('/admin/dashboard', function () {
-    return "Welcome Admin";
-})->middleware('role:admin');
+Route::get('/flights', [FlightController::class, 'index'])->name('flights.index');
+Route::get('/flight', [FlightController::class, 'index'])->name('flights.search');
+Route::post('/flight/search', [FlightController::class, 'search'])->name('flights.results');
 
-Route::get('/admin/users', [UserController::class, 'manageUsers'])->middleware('role:admin');
+// Authenticated routes (require login)
+Route::middleware(['auth'])->group(function () {
 
-Route::post('/admin/users/add', [UserController::class, 'addUser'])->middleware('role:admin');
+    // Logout
+    Route::post('/logout', [UserController::class, 'logout'])->name('logout');
+    Route::get('/my-bookings', [App\Http\Controllers\UserController::class, 'myBookings'])->name('my-bookings');
+    // Profile
+    Route::get('/profile', function () {
+        return view('profile');
+    })->name('profile');
+    Route::post('/update-profile', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/password', [UserController::class, 'updatePassword'])->name('profile.password');
 
-Route::post('/admin/users/update/{id}', [UserController::class, 'updateUser'])->middleware('role:admin');
+    // Admin routes (with role gate)
+    Route::middleware(['can:admin'])->group(function () {
+        Route::get('/admin/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
+        Route::get('/admin/users', [UserController::class, 'manageUsers'])->name('admin.users');
+        Route::post('/admin/users/add', [UserController::class, 'addUser']);
+        Route::post('/admin/users/update/{id}', [UserController::class, 'updateUser']);
+        Route::get('/admin/users/delete/{id}', [UserController::class, 'deleteUser']);
+    });
 
-Route::get('/admin/users/delete/{id}', [UserController::class, 'deleteUser'])->middleware('role:admin');
+    // ========== FLIGHT BOOKING ROUTES ==========
+    Route::post('/booking/select', [BookingController::class, 'selectFlight'])->name('booking.select');
+    Route::get('/booking/luggage', [BookingController::class, 'showLuggageForm'])->name('booking.luggage');
+    Route::post('/booking/luggage', [BookingController::class, 'processLuggage'])->name('booking.process.luggage'); // note dot
+    Route::get('/booking/passengers', [BookingController::class, 'showPassengerForm'])->name('booking.passengers');
+    Route::post('/booking/passengers', [BookingController::class, 'processPassengers'])->name('booking.process.passengers');
+    Route::get('/booking/confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
+    Route::get('/booking/{booking}', [BookingController::class, 'show'])->name('booking.show');
+    Route::get('/bookings', [BookingController::class, 'index'])->name('booking.index');
+    Route::patch('/booking/{booking}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
+    Route::delete('/booking/{booking}', [BookingController::class, 'destroy'])->name('booking.destroy');
+    
+        // ========== COMBO ROUTES ==========
+    Route::get('/combo', [ComboController::class, 'index'])->name('combo.index');
+    Route::post('/combo/search', [ComboController::class, 'search'])->name('combo.search');
+    Route::post('/combo/book', [ComboController::class, 'book'])->name('combo.book');
+    Route::get('/combo/my-bookings', [ComboController::class, 'myBookings'])->name('combo.my-bookings');
 
-//User
-Route::get('/user/dashboard', function () {
-    return "Welcome User";
-})->middleware('role:user');
+        // Passenger routes (must come before wildcard)
+    Route::get('/combo/passengers', [ComboController::class, 'showPassengerForm'])->name('combo.passengers');
+    Route::post('/combo/passengers', [ComboController::class, 'processPassengers'])->name('combo.processPassengers');
 
-Route::get('/profile', function () {
+        // Payment routes (must also come before wildcard)
+    Route::get('/combo/payment', [App\Http\Controllers\PaymentController::class, 'comboPaymentForm'])->name('payment.combo.form');
+    Route::post('/combo/payment', [App\Http\Controllers\PaymentController::class, 'processComboPayment'])->name('payment.combo.process');
 
-    if (!session()->has('user')) {
-        return redirect('/login');
-    }
+        // Wildcard route (parameter) MUST be LAST
+    Route::get('/combo/{comboBooking}', [ComboController::class, 'show'])->name('combo.show');
+    Route::patch('/combo/{comboBooking}/cancel', [ComboController::class, 'cancel'])->name('combo.cancel');
 
-    return view('profile');
-});
+    // Hotel routes (public or auth – your choice)
+    Route::get('/hotels', [App\Http\Controllers\HotelController::class, 'index'])->name('hotels.index');
+    Route::get('/hotels/{hotel}', [App\Http\Controllers\HotelController::class, 'show'])->name('hotels.show');
+    // Hotel booking routes
+    Route::post('/hotel/{hotel}/book', [App\Http\Controllers\HotelBookingController::class, 'bookForm'])->name('hotel.book.form');
+    Route::get('/hotel/booking/confirm', [App\Http\Controllers\HotelBookingController::class, 'confirmBooking'])->name('hotel.booking.confirm');
+    Route::post('/hotel/booking/payment', [App\Http\Controllers\HotelBookingController::class, 'proceedToPayment'])->name('hotel.booking.payment');
+    Route::get('/hotel/payment', [App\Http\Controllers\HotelBookingController::class, 'paymentForm'])->name('payment.hotel.form');
+    Route::post('/hotel/payment', [App\Http\Controllers\HotelBookingController::class, 'processPayment'])->name('payment.hotel.process');
+    Route::get('/hotel/receipt/{hotelBooking}', [App\Http\Controllers\HotelBookingController::class, 'receipt'])->name('hotel.receipt');
+    Route::get('/hotel/my-bookings', [App\Http\Controllers\HotelBookingController::class, 'myBookings'])->name('hotel.my-bookings');
+    Route::patch('/hotel/booking/{hotelBooking}/cancel', [App\Http\Controllers\HotelBookingController::class, 'cancel'])->name('hotel.booking.cancel');
 
-Route::post('/update-profile', [UserController::class, 'updateProfile']);
+    // Flight payment routes
+    Route::get('/flight/payment', [App\Http\Controllers\PaymentController::class, 'flightPaymentForm'])->name('payment.flight.form');
+    Route::post('/flight/payment', [App\Http\Controllers\PaymentController::class, 'processFlightPayment'])->name('payment.flight.process');
 
-Route::post('/logout', function () {
-    session()->forget('user');   
-    return redirect('/login');   
-});
-
-// Flight search routes
-Route::get('/flight', [FlightController::class, 'index'])->name('flights.search'); // shows the search form (flight.blade.php)
-Route::post('/flight/search', [FlightController::class, 'search'])->name('flights.results'); // handles search form submission
+    Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    });

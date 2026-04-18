@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Booking;
+use App\Models\ComboBooking;
 
 class User extends Authenticatable
 {
@@ -41,4 +43,21 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function bookings()
+{
+    return $this->hasMany(Booking::class);
+}
+
+public function comboBookings()
+{
+    return $this->hasMany(ComboBooking::class);
+}
+public function hotelBookings()
+{
+    return $this->hasMany(\App\Models\HotelBooking::class);
+}
+
+
+    
 }

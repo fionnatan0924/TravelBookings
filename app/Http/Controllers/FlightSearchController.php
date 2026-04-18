@@ -10,32 +10,9 @@ class FlightController extends Controller
 {
     // Show flight search form
     public function index()
-{
-    // List of available destinations (city name => airport code)
-    $destinations = [
-        'Kuala Lumpur' => 'KUL',
-        'Penang'       => 'PEN',
-        'Langkawi'     => 'LGK',
-        'Bangkok'      => 'BKK',
-        'Singapore'    => 'SIN',
-        'Bali'         => 'DPS',
-        'Tokyo'        => 'NRT',
-        'Paris'        => 'CDG',
-        'Hong Kong'    => 'HKG',
-        'Maldives'     => 'MLE',
-        'Johor Bahru'  => 'JHB',
-        'Guangzhou'    => 'CAN',
-        'Shanghai'     => 'PVG',
-        'Chongqing'    => 'CKG',
-        'Vietnam'      => 'HAN',
-        'South Korea'  => 'ICN',
-        'Hokkaido'     => 'CTS',
-        'Chiang Mai'   => 'CNX',
-        'Sabah'        => 'BKI',
-    ];
-
-    return view('flight', compact('destinations'));
-}
+    {
+        return view('flight');
+    }
     
 
     // Handle flight search (oneway, round, multi-city)
@@ -114,7 +91,6 @@ class FlightController extends Controller
             'johor'        => 'JHB',
             'langkawi'     => 'LGK',
             'lgk'          => 'LGK',
-            // International
             'guangzhou'    => 'CAN',
             'can'          => 'CAN',
             'singapore'    => 'SIN',
@@ -142,7 +118,6 @@ class FlightController extends Controller
             'infants'  => (int) ($request->infants ?? 0),
             'class'    => $request->class,
         ];
-
         session(['search_params' => $searchParams]);
 
         // ---- Multi-city handling ----
@@ -166,45 +141,51 @@ class FlightController extends Controller
         }
 
         // ---- One-way or Return ----
-        $searchParams['origin']         = $request->from;
-        $searchParams['destination']    = $request->to;
-        $searchParams['departure_date'] = $request->departure_date;
+$searchParams['origin']         = $request->from;
+$searchParams['destination']    = $request->to;
+$searchParams['departure_date'] = $request->departure_date;
 
-        if ($tripType === 'round') {
-            $searchParams['return_date'] = $request->return_date;
+if ($tripType === 'round') {
+    $searchParams['return_date'] = $request->return_date;
+}
+
+// Convert to codes for DB lookup
+$fromCode = $getCode($request->from);
+$toCode   = $getCode($request->to);
+
+// Get outbound flights
+$outboundFlights = Flight::where('origin', $fromCode)
+    ->where('destination', $toCode)
+    ->whereDate('departure_date', $request->departure_date)
+    ->where('cabin_class', $request->class)
+    ->get();
+
+$returnFlights = null;
+$roundTripCombos = [];
+
+if ($tripType === 'round') {
+    // Get return flights
+    $returnFlights = Flight::where('origin', $toCode)
+        ->where('destination', $fromCode)
+        ->whereDate('departure_date', $request->return_date)
+        ->where('cabin_class', $request->class)
+        ->get();
+
+    // Generate all possible combinations
+    foreach ($outboundFlights as $outbound) {
+        foreach ($returnFlights as $return) {
+            $roundTripCombos[] = [
+                'outbound' => $outbound,
+                'return'   => $return,
+                'total_price' => $outbound->price + $return->price,
+            ];
         }
-
-        // Convert to codes for DB lookup
-        $fromCode = $getCode($request->from);
-        $toCode   = $getCode($request->to);
-
-        // Build query
-        $query = Flight::where('origin', $fromCode)
-            ->where('destination', $toCode)
-            ->whereDate('departure_date', $request->departure_date)
-            ->where('cabin_class', $request->class);
-
-        // Optional sorting
-        if ($request->has('sort') && in_array($request->sort, ['price', 'departure_time'])) {
-            $query->orderBy($request->sort);
-        }
-
-        $outboundFlights = $query->get();
-
-        $returnFlights = null;
-        if ($tripType === 'round') {
-            $returnQuery = Flight::where('origin', $toCode)
-                ->where('destination', $fromCode)
-                ->whereDate('departure_date', $request->return_date)
-                ->where('cabin_class', $request->class);
-            if ($request->has('sort')) {
-                $returnQuery->orderBy($request->sort);
-            }
-            $returnFlights = $returnQuery->get();
-        }
-
-        $totalPassengers = $searchParams['adults'] + $searchParams['children'] + $searchParams['infants'];
-
-        return view('flights.results', compact('tripType', 'searchParams', 'outboundFlights', 'returnFlights', 'totalPassengers'));
     }
+}
+
+$totalPassengers = $searchParams['adults'] + $searchParams['children'] + $searchParams['infants'];
+
+// Pass both separate and combined data (the view will use the appropriate one)
+return view('flights.results', compact('tripType', 'searchParams', 'outboundFlights', 'returnFlights', 'roundTripCombos', 'totalPassengers'));
+}
 }

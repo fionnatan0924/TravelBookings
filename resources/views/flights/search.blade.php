@@ -1,43 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Flight Search</title>
-</head>
-<body>
-
-<h2>Flight Search</h2>
-
-@if ($errors->any())
-    <div style="color:red;">
-        @foreach ($errors->all() as $error)
-            <p>{{ $error }}</p>
-        @endforeach
-    </div>
-@endif
-
-<form method="POST" action="/flights/search">
+<form method="POST" action="{{ route('flights.results') }}">
     @csrf
+    <input type="hidden" name="trip_type" value="oneway">
+    <input type="hidden" name="class" value="economy">
+    <input type="hidden" name="adults" value="{{ old('passengers', 1) }}">
+    <input type="hidden" name="children" value="0">
+    <input type="hidden" name="infants" value="0">
 
-    <label>From:</label><br>
-    <input type="text" name="from" value="{{ old('from') }}"><br><br>
+    <!-- your visible fields -->
+    <label>From:</label>
+    <input type="text" name="from" value="{{ old('from') }}">
 
-    <label>To:</label><br>
-    <input type="text" name="to" value="{{ old('to') }}"><br><br>
+    <label>To:</label>
+    <input type="text" name="to" value="{{ old('to') }}">
 
-    <label>Date:</label><br>
-    <input type="date" name="departure_date" value="{{ old('departure_date') }}"><br><br>
+    <label>Date:</label>
+    <input type="date" name="departure_date" value="{{ old('departure_date') }}">
 
-    <label>Passengers:</label><br>
-    <input type="number" name="passengers" min="1" value="{{ old('passengers') }}"><br><br>
+    <!-- Passengers number will be used as adults -->
+    <label>Passengers:</label>
+    <input type="number" name="passengers" min="1" value="{{ old('passengers', 1) }}">
 
-    <label>Sort By:</label><br>
+    <label>Sort By:</label>
     <select name="sort">
-        <option value="price">Price</option>
-        <option value="departure_time">Time</option>
-    </select><br><br>
+        <option value="price" {{ old('sort') == 'price' ? 'selected' : '' }}>Price</option>
+        <option value="departure_time" {{ old('sort') == 'departure_time' ? 'selected' : '' }}>Time</option>
+    </select>
 
     <button type="submit">Search</button>
 </form>
-
-</body>
-</html>
