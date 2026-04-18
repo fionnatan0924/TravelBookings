@@ -53,5 +53,11 @@ public function comboBookings()
 {
     return $this->hasMany(ComboBooking::class);
 }
+public function hotelBookings()
+{
+    return $this->hasMany(\App\Models\HotelBooking::class);
+}
+
+
     
 }

@@ -43,7 +43,7 @@
         </form>
     @endif
 
-    <a href="{{ route('combo.my-bookings') }}" class="back-btn">Back to My Combos</a>
+    <a href="{{ route('my-bookings') }}" class="back-btn">Back To My Booking</a>
 </div>
 
 <style>

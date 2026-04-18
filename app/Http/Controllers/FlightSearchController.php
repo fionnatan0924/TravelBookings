@@ -119,6 +119,7 @@ class FlightController extends Controller
             'infants'  => (int) ($request->infants ?? 0),
             'class'    => $request->class,
         ];
+        session(['search_params' => $searchParams]);
 
         // ---- Multi-city handling ----
         if ($tripType === 'multi') {

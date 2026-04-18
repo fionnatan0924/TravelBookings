@@ -30,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
     protected $policies = [
         Booking::class => BookingPolicy::class,
         ComboBooking::class => ComboBookingPolicy::class,
+        HotelBooking::class => HotelBookingPolicy::class,
     ];
 
 

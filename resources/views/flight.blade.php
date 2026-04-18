@@ -1,3 +1,8 @@
+@extends('layouts.app')
+
+@section('title', 'My Bookings')
+
+@section('content')
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -902,3 +907,4 @@
 </script>
 </body>
 </html>
+@endsection

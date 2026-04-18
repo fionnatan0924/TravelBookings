@@ -23,7 +23,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Logout
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
-
+    Route::get('/my-bookings', [App\Http\Controllers\UserController::class, 'myBookings'])->name('my-bookings');
     // Profile
     Route::get('/profile', function () {
         return view('profile');
@@ -48,8 +48,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/booking/passengers', [BookingController::class, 'showPassengerForm'])->name('booking.passengers');
     Route::post('/booking/passengers', [BookingController::class, 'processPassengers'])->name('booking.process.passengers');
     Route::get('/booking/confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
-    Route::get('/bookings', [BookingController::class, 'index'])->name('booking.index');
     Route::get('/booking/{booking}', [BookingController::class, 'show'])->name('booking.show');
+    Route::get('/bookings', [BookingController::class, 'index'])->name('booking.index');
     Route::patch('/booking/{booking}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
     Route::delete('/booking/{booking}', [BookingController::class, 'destroy'])->name('booking.destroy');
     
@@ -70,5 +70,25 @@ Route::middleware(['auth'])->group(function () {
         // Hotel routes (public or auth – your choice)
         Route::get('/hotels', [App\Http\Controllers\HotelController::class, 'index'])->name('hotels.index');
         Route::get('/hotels/{hotel}', [App\Http\Controllers\HotelController::class, 'show'])->name('hotels.show');
-    
+        // Hotel booking routes
+        Route::post('/hotel/{hotel}/book', [App\Http\Controllers\HotelBookingController::class, 'bookForm'])->name('hotel.book.form');
+        Route::get('/hotel/booking/confirm', [App\Http\Controllers\HotelBookingController::class, 'confirmBooking'])->name('hotel.booking.confirm');
+        Route::post('/hotel/booking/payment', [App\Http\Controllers\HotelBookingController::class, 'proceedToPayment'])->name('hotel.booking.payment');
+        Route::get('/hotel/payment', [App\Http\Controllers\HotelBookingController::class, 'paymentForm'])->name('payment.hotel.form');
+        Route::post('/hotel/payment', [App\Http\Controllers\HotelBookingController::class, 'processPayment'])->name('payment.hotel.process');
+        Route::get('/hotel/receipt/{hotelBooking}', [App\Http\Controllers\HotelBookingController::class, 'receipt'])->name('hotel.receipt');
+        Route::get('/hotel/my-bookings', [App\Http\Controllers\HotelBookingController::class, 'myBookings'])->name('hotel.my-bookings');
+        Route::patch('/hotel/booking/{hotelBooking}/cancel', [App\Http\Controllers\HotelBookingController::class, 'cancel'])->name('hotel.booking.cancel');
+
+        // Flight payment routes
+Route::get('/flight/payment', [App\Http\Controllers\PaymentController::class, 'flightPaymentForm'])->name('payment.flight.form');
+Route::post('/flight/payment', [App\Http\Controllers\PaymentController::class, 'processFlightPayment'])->name('payment.flight.process');
+
+// Hotel payment routes
+Route::get('/hotel/payment', [App\Http\Controllers\PaymentController::class, 'hotelPaymentForm'])->name('payment.hotel.form');
+Route::post('/hotel/payment', [App\Http\Controllers\PaymentController::class, 'processHotelPayment'])->name('payment.hotel.process');
+
+// Combo payment routes
+Route::get('/combo/payment', [App\Http\Controllers\PaymentController::class, 'comboPaymentForm'])->name('payment.combo.form');
+Route::post('/combo/payment', [App\Http\Controllers\PaymentController::class, 'processComboPayment'])->name('payment.combo.process');
     });

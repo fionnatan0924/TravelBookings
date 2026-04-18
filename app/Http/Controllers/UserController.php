@@ -94,4 +94,43 @@ class UserController extends Controller
         User::destroy($id);
         return back();
     }
+
+
+public function myBookings()
+{
+    $user = Auth::user();
+
+    // Fetch all bookings
+    $flightBookings = $user->bookings()->with('outboundFlight')->latest()->get();
+    $comboBookings = $user->comboBookings()->with(['flight', 'hotel'])->latest()->get();
+    $hotelBookings = $user->hotelBookings()->with('hotel')->latest()->get();
+
+    $allBookings = collect();
+
+    foreach ($flightBookings as $booking) {
+        $booking->type = 'flight';
+        $booking->display_title = $booking->outboundFlight->origin . ' → ' . $booking->outboundFlight->destination;
+        $booking->display_date = $booking->booking_date;
+        $allBookings->push($booking);
+    }
+
+    foreach ($comboBookings as $booking) {
+        $booking->type = 'combo';
+        $booking->display_title = $booking->flight->origin . ' → ' . $booking->flight->destination . ' + ' . $booking->hotel->name;
+        $booking->display_date = $booking->created_at;
+        $allBookings->push($booking);
+    }
+
+    foreach ($hotelBookings as $booking) {
+        $booking->type = 'hotel';
+        $booking->display_title = $booking->hotel->name . ' (' . $booking->hotel->city . ')';
+        $booking->display_date = $booking->created_at;
+        $allBookings->push($booking);
+    }
+
+    // Sort by date (most recent first)
+    $allBookings = $allBookings->sortByDesc('display_date');
+
+    return view('my-bookings', compact('allBookings'));
+}
 }

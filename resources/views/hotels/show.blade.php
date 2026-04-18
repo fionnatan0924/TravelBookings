@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="hotel-detail">
-    <!-- Hero Section with Main Image - smaller with border radius -->
+    <!-- Hero Section -->
     <div class="hero-wrapper">
         <div class="hero-image">
             <img src="{{ $hotel->image }}" alt="{{ $hotel->name }}">
@@ -16,6 +16,7 @@
     </div>
 
     <div class="detail-container">
+        <!-- Left column: info -->
         <div class="detail-main">
             <!-- Description -->
             <div class="section">
@@ -23,7 +24,7 @@
                 <p>{{ $hotel->description ?? 'Experience comfort and convenience at '.$hotel->name.'. Our hotel offers modern amenities and exceptional service.' }}</p>
             </div>
 
-            <!-- Gallery – decode JSON from database -->
+            <!-- Gallery -->
             @php
                 $galleryImages = $hotel->gallery ? json_decode($hotel->gallery, true) : [];
             @endphp
@@ -70,34 +71,32 @@
             </div>
         </div>
 
+        <!-- Right column: booking card (sticky) -->
         <div class="detail-sidebar">
             <div class="booking-card">
-                <div class="price-box">
-                    <span class="price">RM {{ number_format($hotel->price_per_night, 2) }}</span>
-                    <span class="per-night">/ night</span>
+                <div class="price-tag">
+                    <span class="currency">RM</span>
+                    <span class="amount">{{ number_format($hotel->price_per_night, 2) }}</span>
+                    <span class="unit">/ night</span>
                 </div>
-                <div class="check-info">
-                    <div><i class="fa-regular fa-clock"></i> Check-in: {{ $hotel->check_in_time ?? '14:00' }}</div>
-                    <div><i class="fa-regular fa-clock"></i> Check-out: {{ $hotel->check_out_time ?? '12:00' }}</div>
-                </div>
-                <form action="{{ route('combo.search') }}" method="GET" class="quick-book">
-                    <div class="form-group">
-                        <label>Departure Date</label>
-                        <input type="date" name="departure_date" required>
+                <div class="divider"></div>
+                <form action="{{ route('hotel.book.form', $hotel) }}" method="POST" class="booking-form">
+                    @csrf
+                    <div class="form-field">
+                        <label>Check-in</label>
+                        <input type="date" name="check_in" required>
                     </div>
-                    <div class="form-group">
-                        <label>Check-out Date</label>
+                    <div class="form-field">
+                        <label>Check-out</label>
                         <input type="date" name="check_out" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-field">
                         <label>Guests</label>
-                        <input type="number" name="guests" value="1" min="1">
+                        <input type="number" name="guests" value="1" min="1" max="10" required>
                     </div>
-                    <input type="hidden" name="destination" value="{{ $hotel->city }}">
-                    <input type="hidden" name="origin" value="KUL">
-                    <button type="submit" class="book-btn">Book as Combo <i class="fa-solid fa-arrow-right"></i></button>
+                    <button type="submit" class="book-now-btn">Book Now <i class="fa-solid fa-arrow-right"></i></button>
                 </form>
-                <p class="note">* Combine with flight for best price</p>
+                <p class="note">* No payment taken now – you will confirm later</p>
             </div>
         </div>
     </div>
@@ -110,7 +109,7 @@
         background: #f5f7fc;
     }
 
-    /* Hero wrapper – smaller image with rounded corners */
+    /* Hero wrapper */
     .hero-wrapper {
         padding: 1.5rem 1.5rem 0 1.5rem;
     }
@@ -152,7 +151,7 @@
         letter-spacing: 2px;
     }
 
-    /* Main container */
+    /* Two-column layout */
     .detail-container {
         display: flex;
         gap: 2rem;
@@ -168,7 +167,7 @@
         min-width: 280px;
     }
 
-    /* Sections (cards) */
+    /* Info cards */
     .section {
         background: white;
         border-radius: 1.5rem;
@@ -190,7 +189,7 @@
         padding-left: 0.8rem;
     }
 
-    /* Gallery grid */
+    /* Gallery */
     .gallery-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -256,7 +255,7 @@
         text-align: center;
     }
 
-    /* Booking card */
+    /* Booking card (right sidebar) */
     .booking-card {
         background: white;
         border-radius: 1.5rem;
@@ -264,45 +263,44 @@
         box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
         position: sticky;
         top: 100px;
-        transition: 0.3s;
     }
-    .price-box {
+    .price-tag {
         text-align: center;
-        border-bottom: 2px solid #eef2f8;
-        padding-bottom: 1rem;
         margin-bottom: 1rem;
     }
-    .price-box .price {
-        font-size: 2.2rem;
+    .currency {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #4a627a;
+        vertical-align: top;
+    }
+    .amount {
+        font-size: 2.4rem;
         font-weight: 800;
         color: #1f4b6e;
+        line-height: 1;
     }
-    .per-night {
-        font-size: 0.85rem;
+    .unit {
+        font-size: 0.9rem;
         color: #6c7e94;
     }
-    .check-info {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 1.2rem;
-        font-size: 0.85rem;
-        color: #4a627a;
-        background: #f8fafc;
-        padding: 0.6rem 1rem;
-        border-radius: 40px;
+    .divider {
+        height: 2px;
+        background: #eef2f8;
+        margin: 1rem 0;
     }
-    .quick-book .form-group {
+    .booking-form .form-field {
         margin-bottom: 1rem;
     }
-    .quick-book label {
+    .booking-form label {
         display: block;
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         color: #4b6b8f;
         margin-bottom: 0.3rem;
     }
-    .quick-book input {
+    .booking-form input {
         width: 100%;
         padding: 0.7rem 1rem;
         border: 1px solid #cbd5e1;
@@ -310,17 +308,17 @@
         font-family: 'Inter', sans-serif;
         transition: 0.2s;
     }
-    .quick-book input:focus {
+    .booking-form input:focus {
         border-color: #1f4b6e;
         outline: none;
         box-shadow: 0 0 0 3px rgba(31,75,110,0.1);
     }
-    .book-btn {
+    .book-now-btn {
         width: 100%;
         background: linear-gradient(105deg, #0f2b3d, #1f4b6e);
         color: white;
         border: none;
-        padding: 0.9rem;
+        padding: 0.8rem;
         border-radius: 40px;
         font-weight: 700;
         font-size: 1rem;
@@ -332,7 +330,7 @@
         transition: all 0.2s;
         margin-top: 0.5rem;
     }
-    .book-btn:hover {
+    .book-now-btn:hover {
         background: linear-gradient(105deg, #1a3a52, #28638b);
         transform: translateY(-2px);
         box-shadow: 0 6px 14px rgba(0,0,0,0.15);

@@ -164,9 +164,8 @@
         <a href="{{ route('flights.search') }}"><i class="fa-solid fa-magnifying-glass"></i> Flights</a>
         <a href="{{ route('combo.index') }}"><i class="fa-solid fa-hotel"></i> Flight+Hotel</a>
         @auth
-            <a href="{{ route('booking.index') }}"><i class="fa-solid fa-ticket"></i> My Bookings</a>
-            <a href="{{ route('combo.my-bookings') }}"><i class="fa-solid fa-box"></i> My Combos</a>
             <a href="{{ route('hotels.index') }}"><i class="fa-solid fa-hotel"></i> Hotels</a>
+            <a href="{{ route('my-bookings') }}"><i class="fa-solid fa-ticket"></i> My Bookings</a>
             <div class="user-info">
                 <span class="user-name"><i class="fa-regular fa-user"></i> {{ Auth::user()->name }}</span>
                 <form method="POST" action="{{ route('logout') }}" style="display: inline;">

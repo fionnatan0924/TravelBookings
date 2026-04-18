@@ -153,7 +153,7 @@
                     </form>
                 @endif
 
-                <a href="{{ route('booking.index') }}" class="btn btn-secondary">Back to My Bookings</a>
+                <a href="{{ route('my-bookings') }}" class="btn btn-secondary">Back to My Bookings</a>
             </div>
         </div>
     </div>

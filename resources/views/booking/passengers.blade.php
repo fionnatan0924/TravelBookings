@@ -99,7 +99,9 @@
                 </div>
             @endfor
 
-            <button type="submit">Continue to Confirmation</button>
+            <button type="submit">
+    <i class="fa-solid fa-credit-card"></i> Proceed to Payment
+</button>
         </form>
     </div>
 </div>
