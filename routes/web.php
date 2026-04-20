@@ -91,3 +91,33 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     });
+
+    Route::resource('attractions', AttractionController::class)->only(['index', 'show']);
+    Route::get('/attractions/search', [AttractionController::class, 'search'])->name('attractions.search');
+
+    // Destinations
+    Route::get('/destinations', [DestinationController::class, 'index'])->name('destinations.index');
+    Route::get('/destinations/{id}', [DestinationController::class, 'show'])->name('destinations.show');
+
+    Route::get('/combos', [PackageController::class, 'index'])->name('combos.index');
+    Route::get('/combos/search', [PackageController::class, 'search'])->name('combos.search');
+    Route::get('/combos/{id}', [PackageController::class, 'show'])->name('combos.show');
+
+    Route::get('/attractions/book/{attraction}', function ($id) {
+        return redirect()->route('attractions.index')->with('info', 'Booking feature coming soon.');
+    })->name('attractions.book');
+    Route::get('/hotels', [App\Http\Controllers\HomeHotelController::class, 'index'])->name('hotels.index');
+
+
+// Hotels
+Route::get('/hotels', [App\Http\Controllers\HotelController::class, 'index'])->name('hotels.index');
+
+Route::get('/combos', [App\Http\Controllers\ComboController::class, 'index'])->name('combos.index');
+
+// Destinations
+Route::get('/destinations', [App\Http\Controllers\DestinationController::class, 'index'])->name('destinations.index');
+Route::get('/destinations/{destination}', [App\Http\Controllers\DestinationController::class, 'show'])->name('destinations.show');
+
+// Attractions
+Route::get('/attractions', [App\Http\Controllers\AttractionController::class, 'index'])->name('attractions.index');
+Route::get('/attractions/book/{attraction}', [App\Http\Controllers\AttractionController::class, 'book'])->name('attractions.book');
