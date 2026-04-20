@@ -6,7 +6,7 @@ use App\Models\Hotel;
 use App\Models\Destination;
 use Illuminate\Http\Request;
 
-class HotelController extends Controller
+class HomeHotelController extends Controller
 {
     public function index(Request $request)
     {

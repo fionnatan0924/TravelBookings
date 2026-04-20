@@ -24,3 +24,8 @@ Route::get('/combos/{id}', [PackageController::class, 'show'])->name('combos.sho
 // Flights
 Route::get('/flights', [FlightController::class, 'index'])->name('flights.index');
 Route::post('/flights/search', [FlightController::class, 'search'])->name('flights.search');
+
+Route::get('/attractions/book/{attraction}', function ($id) {
+    return redirect()->route('attractions.index')->with('info', 'Booking feature coming soon.');
+})->name('attractions.book');
+Route::get('/hotels', [App\Http\Controllers\HomeHotelController::class, 'index'])->name('hotels.index');
