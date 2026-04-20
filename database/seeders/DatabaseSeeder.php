@@ -11,5 +11,6 @@ class DatabaseSeeder extends Seeder
         $this->call(UsersTableSeeder::class);      
         $this->call(FlightsTableSeeder::class);
         $this->call(HotelSeeder::class);
+        $this->call(DestinationsAndAttractionsSeeder::class);
     }
 }
