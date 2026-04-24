@@ -1,13 +1,3 @@
-@if($errors->any())
-        <div class="alert-error">
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -97,7 +87,6 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
-        /* Error alert styles (matching combo page) */
         .alert-error {
             background: #fef2f2;
             border-left: 4px solid #e53e3e;
@@ -140,6 +129,16 @@
 <div class="container">
     <h2><i class="fa-regular fa-user-plus"></i> User Sign Up</h2>
 
+    @if($errors->any())
+        <div class="alert-error">
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="/signup" method="POST">
         @csrf
 
@@ -151,6 +150,7 @@
 
         <label>Password</label>
         <input type="password" name="password" required>
+        <small style="font-size: 0.7rem; color: #5b7e9c;">Must be at least 8 characters, include uppercase, lowercase, number, and symbol.</small>
 
         <label>Confirm Password</label>
         <input type="password" name="password_confirmation" required>
