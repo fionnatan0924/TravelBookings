@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -59,23 +60,30 @@ public function updatePassword(Request $request)
     }
 
     // Handle signup
-    public function signup(Request $request) {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8|confirmed',
-        ]);
+    public function signup(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users',
+        'password' => [
+            'required',
+            'confirmed',
+            Password::min(8)
+                ->mixedCase()      // requires at least one uppercase and one lowercase
+                ->numbers()        // requires at least one number
+                ->symbols(),       // requires at least one symbol
+        ],
+    ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'user', // default role
-        ]);
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+    ]);
 
-        Auth::login($user);
-        return redirect('/');
-    }
+    Auth::login($user);
+    return redirect()->route('home')->with('success', 'Account created successfully!');
+}
 
     // Logout
     public function logout(Request $request) {

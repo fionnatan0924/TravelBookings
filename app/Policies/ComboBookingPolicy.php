@@ -10,7 +10,6 @@ class ComboBookingPolicy
 {
     use HandlesAuthorization;
 
-    // app/Policies/ComboBookingPolicy.php
 public function view(User $user, ComboBooking $comboBooking) {
      return $user->id === $comboBooking->user_id; }
 public function update(User $user, ComboBooking $comboBooking) {
