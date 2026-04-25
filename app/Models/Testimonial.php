@@ -8,9 +8,10 @@ use App\Models\User;
 class Testimonial extends Model
 {
     protected $fillable = [
+        'user_id',
+        'name',
         'content',
         'location',
-        'user_id'
     ];
 
     public function user()
