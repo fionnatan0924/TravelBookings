@@ -129,15 +129,20 @@ public function updatePassword(Request $request)
     return view('profile', compact('user'));
 }
 
+public function attractionBookings()
+{
+    return $this->hasMany(AttractionBooking::class);
+}
+
 
 public function myBookings()
 {
     $user = Auth::user();
 
-    // Fetch all bookings
     $flightBookings = $user->bookings()->with('outboundFlight')->latest()->get();
     $comboBookings = $user->comboBookings()->with(['flight', 'hotel'])->latest()->get();
     $hotelBookings = $user->hotelBookings()->with('hotel')->latest()->get();
+    $attractionBookings = $user->attractionBookings()->with('attraction.destination')->latest()->get();
 
     $allBookings = collect();
 
@@ -162,7 +167,14 @@ public function myBookings()
         $allBookings->push($booking);
     }
 
-    // Sort by date (most recent first)
+    // ADD attraction bookings to the collection
+    foreach ($attractionBookings as $booking) {
+        $booking->type = 'attraction';
+        $booking->display_title = $booking->attraction->name . ' (' . $booking->attraction->destination->name . ')';
+        $booking->display_date = $booking->booking_date;
+        $allBookings->push($booking);
+    }
+
     $allBookings = $allBookings->sortByDesc('display_date');
 
     return view('my-bookings', compact('allBookings'));

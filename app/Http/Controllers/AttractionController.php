@@ -4,11 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Attraction;
 use App\Models\Destination;
+use App\Models\AttractionBooking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 class AttractionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->only([
+            'bookForm', 'confirmBooking', 'proceedToPayment',
+            'paymentForm', 'processPayment', 'receipt'
+        ]);
+    }
+
     /**
      * Display a listing of attractions with search/filters.
      */
@@ -16,27 +27,19 @@ class AttractionController extends Controller
     {
         $query = Attraction::with('destination')->where('is_active', true);
 
-        // Filter by destination
         if ($request->filled('destination_id')) {
             $query->where('destination_id', $request->destination_id);
         }
-
-        // Filter by min price
         if ($request->filled('min_price')) {
             $query->where('price', '>=', $request->min_price);
         }
-
-        // Filter by max price
         if ($request->filled('max_price')) {
             $query->where('price', '<=', $request->max_price);
         }
-
-        // Search by name
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        // Sorting
         $sort = $request->get('sort', 'latest');
         switch ($sort) {
             case 'price_asc':
@@ -105,31 +108,138 @@ class AttractionController extends Controller
     /**
      * Display the specified attraction (detail page).
      */
-    public function show($id)
+    public function show(Attraction $attraction)
     {
-        $attraction = Attraction::with('destination')->findOrFail($id);
-        // Increment view count or store in session (optional)
+        $attraction->load('destination');
         return view('attractions.show', compact('attraction'));
     }
 
     /**
-     * Display the attraction booking page for ticket purchase.
+     * Display the attraction booking page (ticket quantity form).
      */
-    public function book($id)
+    public function book(Attraction $attraction)
     {
-        $attraction = Attraction::with('destination')->findOrFail($id);
         return view('attractions.book', compact('attraction'));
     }
 
     /**
+     * Process the booking form, store in session, redirect to confirmation.
+     */
+    public function bookForm(Request $request)
+{
+    $validated = $request->validate([
+        'attraction_id' => 'required|exists:attractions,id',
+        'number_of_people' => 'required|integer|min:1|max:50',
+    ]);
+
+    $attraction = Attraction::findOrFail($validated['attraction_id']);
+    $totalPrice = $attraction->price * $validated['number_of_people'];
+
+    // Store directly as pending booking (ready for payment)
+    session(['pending_attraction_booking' => [
+        'attraction_id' => $attraction->id,
+        'number_of_people' => $validated['number_of_people'],
+        'total_price' => $totalPrice,
+        'attraction_name' => $attraction->name,
+        'destination' => $attraction->destination->name,
+    ]]);
+
+    // Redirect straight to payment form
+    return redirect()->route('payment.attraction.form');
+}
+
+    /**
+     * Show confirmation page before payment.
+     */
+    public function confirmBooking()
+    {
+        $booking = session('attraction_booking');
+        if (!$booking) {
+            return redirect()->route('attractions.index')->with('error', 'No booking in progress.');
+        }
+        $attraction = Attraction::findOrFail($booking['attraction_id']);
+        return view('attractions.booking_confirm', compact('attraction', 'booking'));
+    }
+
+    /**
+     * Move booking data to pending and redirect to payment page.
+     */
+    public function proceedToPayment()
+    {
+        $booking = session('attraction_booking');
+        if (!$booking) {
+            return redirect()->route('attractions.index')->with('error', 'No booking in progress.');
+        }
+        session(['pending_attraction_booking' => $booking]);
+        session()->forget('attraction_booking');
+        return redirect()->route('payment.attraction.form');
+    }
+
+    /**
+     * Show the payment form (reuses payment.form view).
+     */
+    public function paymentForm()
+    {
+        $booking = session('pending_attraction_booking');
+        if (!$booking) {
+            return redirect()->route('attractions.index')->with('error', 'No booking data found.');
+        }
+
+        $total = $booking['total_price'];
+        $type = 'attraction';
+        return view('payment.form', compact('total', 'type'));
+    }
+
+    /**
+     * Process payment and create attraction booking record.
+     */
+    public function processPayment(Request $request)
+    {
+        $request->validate([
+            'card_number' => 'required|string',
+            'expiry' => 'required|string',
+            'cvv' => 'required|string',
+        ]);
+
+        $bookingData = session('pending_attraction_booking');
+        if (!$bookingData) {
+            return redirect()->route('attractions.index')->with('error', 'No booking data.');
+        }
+
+        $attractionBooking = AttractionBooking::create([
+            'user_id' => Auth::id(),
+            'attraction_id' => $bookingData['attraction_id'],
+            'number_of_people' => $bookingData['number_of_people'],
+            'total_price' => $bookingData['total_price'],
+            'booking_reference' => strtoupper(Str::random(10)),
+            'status' => 'confirmed',
+            'booking_date' => now(),
+        ]);
+
+        session()->forget('pending_attraction_booking');
+        return redirect()->route('attraction.receipt', $attractionBooking->id)->with('success', 'Payment successful! Attraction booked.');
+    }
+
+    /**
+     * Show receipt after payment.
+     */
+    public function receipt($id)
+{
+    $booking = AttractionBooking::with('attraction')->findOrFail($id);
+    if ($booking->user_id !== Auth::id()) {
+        abort(403);
+    }
+    return view('attractions.receipt', compact('booking'));
+}
+
+    /**
      * Show the form for editing an attraction (Admin only).
      */
-    public function edit($id)
+    public function edit(Attraction $attraction)
     {
         if (!Gate::allows('admin')) {
             abort(403, 'Unauthorized');
         }
-        $attraction = Attraction::findOrFail($id);
         $destinations = Destination::all();
         return view('admin.attractions.edit', compact('attraction', 'destinations'));
     }
@@ -137,13 +247,11 @@ class AttractionController extends Controller
     /**
      * Update the specified attraction (Admin only).
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Attraction $attraction)
     {
         if (!Gate::allows('admin')) {
             abort(403, 'Unauthorized');
         }
-
-        $attraction = Attraction::findOrFail($id);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -171,12 +279,11 @@ class AttractionController extends Controller
     /**
      * Remove the specified attraction (Admin only).
      */
-    public function destroy($id)
+    public function destroy(Attraction $attraction)
     {
         if (!Gate::allows('admin')) {
             abort(403, 'Unauthorized');
         }
-        $attraction = Attraction::findOrFail($id);
         $attraction->delete();
 
         return redirect()->route('admin.attractions.index')

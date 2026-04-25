@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Payment')
+@section('title', 'Flight Payment')
 
 @section('content')
 @if ($errors->any())
@@ -14,18 +14,13 @@
 @endif
 <div class="payment-container">
     <div class="payment-card">
-        <h1><i class="fa-regular fa-credit-card"></i> Payment</h1>
-        <p>Complete your {{ ucfirst($type) }} booking</p>
+        <h1><i class="fa-regular fa-credit-card"></i> Flight Payment</h1>
+        <p>Complete your flight booking</p>
         <div class="summary">
             <p><strong>Total:</strong> RM {{ number_format($total, 2) }}</p>
         </div>
 
-        <form method="POST" action="{{ 
-    $type === 'flight' ? route('payment.flight.process') : 
-    ($type === 'hotel' ? route('payment.hotel.process') : 
-    ($type === 'combo' ? route('payment.combo.process') : 
-    ($type === 'attraction' ? route('payment.attraction.process') : '#'))) 
-}}">
+        <form method="POST" action="{{ route('payment.flight.process') }}">
             @csrf
             <div class="form-group">
                 <label>Card Number</label>
@@ -64,13 +59,11 @@
 </style>
 
 <script>
-    // Auto-format card number
     document.getElementById('card_number').addEventListener('input', function(e) {
         let value = e.target.value.replace(/\D/g, '').substring(0, 16);
         let formatted = value.replace(/(\d{4})(?=\d)/g, '$1 ');
         e.target.value = formatted;
     });
-    // Auto-format expiry
     document.getElementById('expiry').addEventListener('input', function(e) {
         let value = e.target.value.replace(/\D/g, '').substring(0, 4);
         if (value.length >= 2) {
@@ -78,7 +71,6 @@
         }
         e.target.value = value;
     });
-    // CVV: only numbers
     document.getElementById('cvv').addEventListener('input', function(e) {
         e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
     });
