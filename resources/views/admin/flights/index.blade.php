@@ -61,7 +61,6 @@
 </div>
 
 <style>
-    /* (all styles remain exactly the same as before) */
     .admin-flights {
         max-width: 1400px;
         margin: 0 auto;

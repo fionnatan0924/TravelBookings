@@ -31,5 +31,9 @@
         <button type="submit" class="btn-primary">Create Flight</button>
     </form>
 </div>
-<style>/* same as user form */</style>
+<style>.admin-form { max-width: 500px; margin: 0 auto; background: white; padding: 2rem; border-radius: 1.5rem; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-weight: 600; margin-bottom: 0.3rem; }
+    input, select { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 12px; }
+    .btn-primary { background: #0f2b3d; color: white; padding: 0.6rem 1.2rem; border-radius: 40px; border: none; cursor: pointer; }</style>
 @endsection
