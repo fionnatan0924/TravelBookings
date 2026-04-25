@@ -64,7 +64,7 @@
             background: #eef2fa;
         }
 
-        /* Flight card */
+        /* Flight card (standard) */
         .flight-card {
             background: white;
             border-radius: 1rem;
@@ -82,7 +82,44 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         }
 
-        /* Airline + baggage */
+        /* Round-trip combined card */
+        .roundtrip-card {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .roundtrip-details {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .outbound-leg, .return-leg {
+            background: #f9fafb;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            min-width: 200px;
+        }
+        .airline {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .route {
+            font-size: 0.9rem;
+            color: #1f4b6e;
+        }
+        .time, .date {
+            font-size: 0.85rem;
+            color: #4a627a;
+        }
+        .arrow-icon {
+            font-size: 1.2rem;
+            color: #8aa0b5;
+        }
+
+        /* Airline + baggage (for one-way) */
         .airline-section {
             width: 160px;
         }
@@ -103,7 +140,7 @@
             margin-top: 6px;
         }
 
-        /* Flight times */
+        /* Flight times (one-way) */
         .flight-times {
             flex: 2;
             display: flex;
@@ -187,37 +224,53 @@
         }
 
         @media (max-width: 800px) {
-            .flight-card { flex-direction: column; align-items: stretch; gap: 1rem; }
+            .flight-card, .roundtrip-card { flex-direction: column; align-items: stretch; gap: 1rem; }
             .price-section { text-align: left; }
             .select-btn { width: auto; }
+            .roundtrip-details { flex-direction: column; align-items: stretch; }
+            .arrow-icon { transform: rotate(90deg); align-self: center; }
         }
     </style>
 </head>
 <body>
-<div class="search-summary">
-    <div class="route-title">
-        @if($tripType === 'multi')
-            Multi-city trip
-        @else
-            {{ $searchParams['origin'] }} → {{ $searchParams['destination'] }}
-        @endif
-        <span class="flight-count">
+<div class="container">
+    <div class="search-summary">
+        <div class="route-title">
             @if($tripType === 'multi')
-                {{ collect($results)->sum(fn($r) => count($r['flights'])) }} flights found
+                Multi-city trip
+            @elseif($tripType === 'round' && isset($roundTripCombos))
+                {{ $searchParams['origin'] }} → {{ $searchParams['destination'] }}
             @else
-                {{ count($outboundFlights) }} flights found
+                {{ $searchParams['origin'] }} → {{ $searchParams['destination'] }}
             @endif
-        </span>
+            <span class="flight-count">
+                @if($tripType === 'multi')
+                    {{ collect($results)->sum(fn($r) => count($r['flights'])) }} flights found
+                @elseif($tripType === 'round' && isset($roundTripCombos))
+                    {{ count($roundTripCombos) }} round‑trip offers
+                @else
+                    {{ count($outboundFlights) }} flights found
+                @endif
+            </span>
+        </div>
+        <div style="font-size:0.85rem; color:#5b7e9c; margin-top: 6px;">
+            @if($tripType !== 'multi')
+                {{ $searchParams['departure_date'] }} • {{ ucfirst($searchParams['class']) }} • 
+                {{ $searchParams['adults'] }} Adult(s)
+                @if($tripType === 'round')
+                    → Return: {{ $searchParams['return_date'] }}
+                @endif
+            @else
+                {{ ucfirst($searchParams['class']) }} • {{ $searchParams['adults'] }} Adult(s)
+            @endif
+        </div>
     </div>
-    <div style="font-size:0.85rem; color:#5b7e9c; margin-top: 6px;">
-        @if($tripType !== 'multi')
-            {{ $searchParams['departure_date'] }} • {{ ucfirst($searchParams['class']) }} • 
-            {{ $searchParams['adults'] }} Adult(s)
-        @else
-            {{ ucfirst($searchParams['class']) }} • {{ $searchParams['adults'] }} Adult(s)
-        @endif
+
+    <div class="sorting-tabs">
+        <button class="sort-btn" data-sort="price">Price</button>
+        <button class="sort-btn" data-sort="departure">Departure</button>
+        <button class="sort-btn" data-sort="duration">Duration</button>
     </div>
-</div>
 
     {{-- FLIGHT LISTINGS --}}
     @if($tripType === 'multi')
@@ -231,40 +284,113 @@
                 <div class="no-flights">No flights for this segment</div>
             @endforelse
         @endforeach
-    @else
-        {{-- Outbound flights --}}
+
+    @elseif($tripType === 'round' && isset($roundTripCombos) && count($roundTripCombos) > 0)
+        {{-- Combined round‑trip offers --}}
+        @foreach($roundTripCombos as $combo)
+            <div class="flight-card roundtrip-card" data-price="{{ $combo['total_price'] }}" data-departure="{{ $combo['outbound']->departure_time }}">
+                <div class="roundtrip-details">
+                    <div class="outbound-leg">
+                        <div class="airline"><i class="fa-solid fa-plane-departure"></i> {{ $combo['outbound']->airline }}</div>
+                        <div class="route">{{ $combo['outbound']->origin }} → {{ $combo['outbound']->destination }}</div>
+                        <div class="time">{{ \Carbon\Carbon::parse($combo['outbound']->departure_time)->format('H:i') }}</div>
+                        <div class="date">{{ \Carbon\Carbon::parse($combo['outbound']->departure_date)->format('d M Y') }}</div>
+                    </div>
+                    <div class="arrow-icon"><i class="fa-solid fa-arrow-right-long"></i></div>
+                    <div class="return-leg">
+                        <div class="airline"><i class="fa-solid fa-plane-return"></i> {{ $combo['return']->airline }}</div>
+                        <div class="route">{{ $combo['return']->origin }} → {{ $combo['return']->destination }}</div>
+                        <div class="time">{{ \Carbon\Carbon::parse($combo['return']->departure_time)->format('H:i') }}</div>
+                        <div class="date">{{ \Carbon\Carbon::parse($combo['return']->departure_date)->format('d M Y') }}</div>
+                    </div>
+                </div>
+                <div class="price-section">
+                    <div class="price">RM {{ number_format($combo['total_price'], 0) }}</div>
+                    <span class="return-label">Round trip</span>
+                    <form action="{{ route('booking.select') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="outbound_flight_id" value="{{ $combo['outbound']->id }}">
+                        <input type="hidden" name="return_flight_id" value="{{ $combo['return']->id }}">
+                        <input type="hidden" name="trip_type" value="round">
+                        <button type="submit" class="select-btn">Select</button>
+                    </form>
+                </div>
+            </div>
+        @endforeach
+
+    @elseif($tripType === 'round')
+        {{-- Fallback: separate outbound/return lists (if $roundTripCombos is empty or not set) --}}
+        <div style="margin: 2rem 0 1rem 0; font-size: 1.2rem; font-weight: 700;">
+            <i class="fa-solid fa-plane-departure"></i> Outbound flights
+        </div>
         @forelse($outboundFlights as $flight)
             @include('flights._flight_card', ['flight' => $flight, 'type' => 'outbound'])
         @empty
-            <div class="no-flights">No outbound flights found. Try different dates.</div>
+            <div class="no-flights">No outbound flights found.</div>
         @endforelse
 
-        {{-- Return flights (round trip) --}}
-        @if($tripType === 'round')
-            <div style="margin: 2rem 0 1rem 0; font-size: 1.2rem; font-weight: 700;">
-                <i class="fa-solid fa-arrow-left"></i> Return flights
-            </div>
-            @forelse($returnFlights as $flight)
-                @include('flights._flight_card', ['flight' => $flight, 'type' => 'return'])
-            @empty
-                <div class="no-flights">No return flights found</div>
-            @endforelse
-        @endif
+        <div style="margin: 2rem 0 1rem 0; font-size: 1.2rem; font-weight: 700;">
+            <i class="fa-solid fa-plane-return"></i> Return flights
+        </div>
+        @forelse($returnFlights as $flight)
+            @include('flights._flight_card', ['flight' => $flight, 'type' => 'return'])
+        @empty
+            <div class="no-flights">No return flights found.</div>
+        @endforelse
+
+    @else
+        {{-- One-way: outbound only --}}
+        @forelse($outboundFlights as $flight)
+            @include('flights._flight_card', ['flight' => $flight, 'type' => 'outbound'])
+        @empty
+            <div class="no-flights">No flights found. Try different dates.</div>
+        @endforelse
     @endif
 
     <div style="text-align: center; margin-top: 2rem;">
-        <a href="{{ url('/') }}" style="background: #6c757d; color: white; padding: 0.6rem 1.8rem; border-radius: 40px; text-decoration: none; display: inline-block;">New search</a>
+        <a href="{{ url('/') }}" class="new-search-btn">New search</a>
     </div>
 </div>
 
+<style>
+    .new-search-btn {
+        background: #6c757d;
+        color: white;
+        padding: 0.6rem 1.8rem;
+        border-radius: 40px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .new-search-btn:hover {
+        background: #5a6268;
+    }
+</style>
+
 <script>
-    // Simple sorting demo – you can replace with full logic
+    // Simple sorting for cards (works on data-price and data-departure)
     document.querySelectorAll('.sort-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            // Here you would re-sort the flight cards
-            alert('Sorting by ' + this.innerText + ' – implement your sorting logic');
+            const sortType = this.dataset.sort;
+            const container = document.querySelector('.container');
+            const cards = Array.from(document.querySelectorAll('.flight-card'));
+            if (cards.length === 0) return;
+            cards.sort((a, b) => {
+                if (sortType === 'price') {
+                    let priceA = parseFloat(a.dataset.price);
+                    let priceB = parseFloat(b.dataset.price);
+                    if (isNaN(priceA)) priceA = 0;
+                    if (isNaN(priceB)) priceB = 0;
+                    return priceA - priceB;
+                } else if (sortType === 'departure') {
+                    let timeA = a.dataset.departure || '';
+                    let timeB = b.dataset.departure || '';
+                    return timeA.localeCompare(timeB);
+                }
+                return 0;
+            });
+            cards.forEach(card => container.appendChild(card));
         });
     });
 </script>
