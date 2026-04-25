@@ -1,458 +1,464 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Travelio | Smart Flight Search</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+@extends('layouts.app')
 
-        body {
-            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(#FCF7F4);
-            min-height: 100vh;
-            padding: 2rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+@section('title', 'Smart Flight Search')
 
-        .flight-card {
-            max-width: 920px;
-            width: 100%;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 2rem;
-            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-        }
+@section('content')
+<style>
+    /* ========== YOUR ORIGINAL STYLES (body rule removed) ========== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .card-header {
-            background: #ffffff;
-            padding: 1.5rem 2rem 0.75rem 2rem;
-            border-bottom: 1px solid #eef2f6;
-        }
+    /* NEW: wrapper to center the card vertically & horizontally */
+    .flight-page-wrapper {
+        min-height: calc(100vh - 80px); /* leaves room for header/footer */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem 1rem;
+    }
 
-        .card-header h2 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #1a2a3f, #1e3a5f);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    .flight-card {
+        max-width: 920px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 2rem;
+        box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
 
-        .form-container {
-            padding: 1.8rem 2rem 2.2rem 2rem;
-        }
+    .card-header {
+        background: #ffffff;
+        padding: 1.5rem 2rem 0.75rem 2rem;
+        border-bottom: 1px solid #eef2f6;
+    }
 
-        .trip-type-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-            background: #f8fafc;
-            padding: 0.5rem;
-            border-radius: 60px;
-            width: fit-content;
-        }
+    .card-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #1a2a3f, #1e3a5f);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-        .trip-option {
-            position: relative;
-        }
+    .form-container {
+        padding: 1.8rem 2rem 2.2rem 2rem;
+    }
 
-        .trip-option input {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+    .trip-type-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        background: #f8fafc;
+        padding: 0.5rem;
+        border-radius: 60px;
+        width: fit-content;
+    }
 
-        .trip-option label {
-            display: inline-block;
-            padding: 0.6rem 1.5rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border-radius: 40px;
-            background: transparent;
-            color: #4a5b6e;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+    .trip-option {
+        position: relative;
+    }
 
-        .trip-option input:checked + label {
-            background: #ffffff;
-            color: #0f2b3d;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            font-weight: 700;
-        }
+    .trip-option input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
 
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
+    .trip-option label {
+        display: inline-block;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-radius: 40px;
+        background: transparent;
+        color: #4a5b6e;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
 
-        .input-row {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
+    .trip-option input:checked + label {
+        background: #ffffff;
+        color: #0f2b3d;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        font-weight: 700;
+    }
 
-        .input-row .field {
-            flex: 1;
-            min-width: 140px;
-        }
+    .input-group {
+        margin-bottom: 1.5rem;
+    }
 
-        label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #4b6b8f;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
+    .input-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
 
-        .input-icon {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
+    .input-row .field {
+        flex: 1;
+        min-width: 140px;
+    }
 
-        .input-icon i {
-            position: absolute;
-            left: 14px;
-            color: #8aa0b5;
-            font-size: 0.95rem;
-            pointer-events: none;
-        }
+    label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #4b6b8f;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
 
-        input, select {
-            width: 100%;
-            padding: 0.85rem 1rem 0.85rem 2.5rem;
-            font-size: 0.95rem;
-            font-family: 'Inter', monospace;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 16px;
-            background: #ffffff;
-            transition: all 0.2s;
-            outline: none;
-            color: #1e2f3e;
-            font-weight: 500;
-        }
+    .input-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
 
-        select {
-            padding-left: 2.5rem;
-            appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23647b92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-        }
+    .input-icon i {
+        position: absolute;
+        left: 14px;
+        color: #8aa0b5;
+        font-size: 0.95rem;
+        pointer-events: none;
+    }
 
-        input:focus, select:focus {
-            border-color: #2c6e9e;
-            box-shadow: 0 0 0 3px rgba(44, 110, 158, 0.15);
-        }
+    input, select {
+        width: 100%;
+        padding: 0.85rem 1rem 0.85rem 2.5rem;
+        font-size: 0.95rem;
+        font-family: 'Inter', monospace;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 16px;
+        background: #ffffff;
+        transition: all 0.2s;
+        outline: none;
+        color: #1e2f3e;
+        font-weight: 500;
+    }
 
-        /* error styles */
-        input.error-field, select.error-field {
-            border-color: #e53e3e;
-            background-color: #fff5f5;
-        }
+    select {
+        padding-left: 2.5rem;
+        appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23647b92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+    }
 
-        .error-message {
-            font-size: 0.7rem;
-            color: #e53e3e;
-            margin-top: 0.3rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+    input:focus, select:focus {
+        border-color: #2c6e9e;
+        box-shadow: 0 0 0 3px rgba(44, 110, 158, 0.15);
+    }
 
-        .passenger-grid {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
+    input.error-field, select.error-field {
+        border-color: #e53e3e;
+        background-color: #fff5f5;
+    }
 
-        .passenger-grid .field {
-            flex: 1;
-        }
+    .error-message {
+        font-size: 0.7rem;
+        color: #e53e3e;
+        margin-top: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
 
-        .passenger-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #2c5a7a;
-            margin-bottom: 0.3rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .passenger-label span {
-            font-weight: normal;
-            color: #6c8eae;
-            font-size: 0.7rem;
-        }
+    .passenger-grid {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
 
-        .multi-city-panel {
-            background: #fefefe;
-            border-radius: 1.2rem;
-            padding: 0.2rem 0 0.5rem 0;
-            margin-top: 0.25rem;
-        }
+    .passenger-grid .field {
+        flex: 1;
+    }
 
-        .segment-card {
-            background: #fafcff;
-            border: 1px solid #eef2f8;
-            border-radius: 1.2rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            transition: all 0.2s;
-        }
+    .passenger-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #2c5a7a;
+        margin-bottom: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .passenger-label span {
+        font-weight: normal;
+        color: #6c8eae;
+        font-size: 0.7rem;
+    }
 
-        .segment-card.error-segment {
-            border-color: #e53e3e;
-            background-color: #fff5f5;
-        }
+    .multi-city-panel {
+        background: #fefefe;
+        border-radius: 1.2rem;
+        padding: 0.2rem 0 0.5rem 0;
+        margin-top: 0.25rem;
+    }
 
-        .segment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #2c6e9e;
-        }
+    .segment-card {
+        background: #fafcff;
+        border: 1px solid #eef2f8;
+        border-radius: 1.2rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.2s;
+    }
 
-        .segment-remove {
-            background: none;
-            border: none;
-            color: #b91c1c;
-            cursor: pointer;
-            font-size: 1rem;
-            padding: 4px 8px;
-            border-radius: 30px;
-        }
+    .segment-card.error-segment {
+        border-color: #e53e3e;
+        background-color: #fff5f5;
+    }
 
-        .segment-remove:hover {
-            background: #fee2e2;
-        }
+    .segment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #2c6e9e;
+    }
 
-        .add-segment-btn {
-            background: transparent;
-            border: 1.5px dashed #bbd4e8;
-            padding: 0.7rem;
-            width: 100%;
-            border-radius: 60px;
-            font-weight: 600;
-            color: #2c6e9e;
-            cursor: pointer;
-            margin-top: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
+    .segment-remove {
+        background: none;
+        border: none;
+        color: #b91c1c;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 4px 8px;
+        border-radius: 30px;
+    }
 
-        .add-segment-btn:hover {
-            background: #eef6fc;
-            border-color: #2c6e9e;
-        }
+    .segment-remove:hover {
+        background: #fee2e2;
+    }
 
-        button.primary-btn {
-            width: 100%;
-            background: linear-gradient(105deg, #0f2b3d 0%, #1f4b6e 100%);
-            border: none;
-            padding: 1rem;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 700;
-            color: white;
-            cursor: pointer;
-            margin-top: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 6px 14px rgba(0, 20, 40, 0.15);
-        }
+    .add-segment-btn {
+        background: transparent;
+        border: 1.5px dashed #bbd4e8;
+        padding: 0.7rem;
+        width: 100%;
+        border-radius: 60px;
+        font-weight: 600;
+        color: #2c6e9e;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
 
-        button.primary-btn:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(105deg, #1a3a52, #28638b);
-        }
+    .add-segment-btn:hover {
+        background: #eef6fc;
+        border-color: #2c6e9e;
+    }
 
-        hr {
-            margin: 1rem 0;
-            border: 0;
-            height: 1px;
-            background: #eef2f8;
-        }
+    button.primary-btn {
+        width: 100%;
+        background: linear-gradient(105deg, #0f2b3d 0%, #1f4b6e 100%);
+        border: none;
+        padding: 1rem;
+        border-radius: 40px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+        margin-top: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 6px 14px rgba(0, 20, 40, 0.15);
+    }
 
-        .hidden {
-            display: none;
-        }
+    button.primary-btn:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(105deg, #1a3a52, #28638b);
+    }
 
-        @media (max-width: 680px) {
-            .form-container { padding: 1.5rem; }
-            .input-row { flex-direction: column; gap: 1rem; }
-            .passenger-grid { flex-direction: column; }
-        }
-    </style>
-</head>
-<body>
-@if(session()->has('flight_searches') && count(session('flight_searches')) > 0)
-<div style="margin-top: 2rem; background: #f0f4f9; padding: 1rem; border-radius: 1rem;">
-    <h4 style="margin-bottom: 0.75rem; color: #1e2f3e;">
-        <i class="fa-regular fa-clock"></i> Recent searches
-    </h4>
-    <ul style="list-style: none; padding: 0; margin: 0;">
-        @foreach(session('flight_searches') as $search)
-        <li style="margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem;">
-            <div style="font-weight: 600;">{{ $search['from'] }} → {{ $search['to'] }}</div>
-            <div style="color: #5b7e9c;">
-                {{ $search['departure_date'] }} • {{ ucfirst($search['class']) }} • {{ $search['adults'] }} adult(s)
-                <small style="display: block; margin-top: 4px;">{{ $search['searched_at'] }}</small>
-            </div>
-        </li>
-        @endforeach
-    </ul>
-</div>
-@endif
-<div class="flight-card">
-    <div class="card-header">
-        <h2><i class="fa-solid fa-plane-departure"></i> Travelio</h2>
-        <p style="font-size: 0.85rem; color: #5b7e9c; margin-top: 6px;">Smart search · best routes</p>
+    hr {
+        margin: 1rem 0;
+        border: 0;
+        height: 1px;
+        background: #eef2f8;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .recent-searches {
+        width: 100%;
+        max-width: 920px;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 680px) {
+        .form-container { padding: 1.5rem; }
+        .input-row { flex-direction: column; gap: 1rem; }
+        .passenger-grid { flex-direction: column; }
+    }
+</style>
+
+<div class="flight-page-wrapper">
+    @if(session()->has('flight_searches') && count(session('flight_searches')) > 0)
+    <div class="recent-searches">
+        <div style="background: #f0f4f9; padding: 1rem; border-radius: 1rem;">
+            <h4 style="margin-bottom: 0.75rem; color: #1e2f3e;">
+                <i class="fa-regular fa-clock"></i> Recent searches
+            </h4>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                @foreach(session('flight_searches') as $search)
+                <li style="margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem;">
+                    <div style="font-weight: 600;">{{ $search['from'] }} → {{ $search['to'] }}</div>
+                    <div style="color: #5b7e9c;">
+                        {{ $search['departure_date'] }} • {{ ucfirst($search['class']) }} • {{ $search['adults'] }} adult(s)
+                        <small style="display: block; margin-top: 4px;">{{ $search['searched_at'] }}</small>
+                    </div>
+                </li>
+                @endforeach
+            </ul>
+        </div>
     </div>
-    <div class="form-container">
-    <form id="flightSearchForm" action="{{ route('flights.results') }}" method="POST" novalidate>
-            @csrf
+    @endif
 
-            <div class="trip-type-group">
-                <div class="trip-option">
-                    <input type="radio" name="trip_type" id="trip_oneway" value="oneway" checked>
-                    <label for="trip_oneway"><i class="fa-solid fa-arrow-right"></i> One Way</label>
-                </div>
-                <div class="trip-option">
-                    <input type="radio" name="trip_type" id="trip_round" value="round">
-                    <label for="trip_round"><i class="fa-solid fa-arrow-right-arrow-left"></i> Return</label>
-                </div>
-                <div class="trip-option">
-                    <input type="radio" name="trip_type" id="trip_multi" value="multi">
-                    <label for="trip_multi"><i class="fa-solid fa-layer-group"></i> Multi-city</label>
-                </div>
-            </div>
+    <div class="flight-card">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-plane-departure"></i> Travelio</h2>
+            <p style="font-size: 0.85rem; color: #5b7e9c; margin-top: 6px;">Smart search · best routes</p>
+        </div>
+        <div class="form-container">
+            <form id="flightSearchForm" action="{{ route('flights.results') }}" method="POST" novalidate>
+                @csrf
 
-            <div id="standardFields">
-            <div class="field">
-    <label><i class="fa-solid fa-location-dot"></i> From</label>
-    <div class="input-icon">
-        <i class="fa-solid fa-city"></i>
-        <select name="from" id="originInput" class="destination-select">
-            <option value="">Select departure city</option>
-            @foreach($destinations as $city => $code)
-                <option value="{{ $code }}">{{ $city }} ({{ $code }})</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="error-message" id="originError"></div>
-</div>
-<div class="field">
-    <label><i class="fa-solid fa-location-arrow"></i> To</label>
-    <div class="input-icon">
-        <i class="fa-solid fa-map-pin"></i>
-        <select name="to" id="destInput" class="destination-select">
-            <option value="">Select arrival city</option>
-            @foreach($destinations as $city => $code)
-                <option value="{{ $code }}">{{ $city }} ({{ $code }})</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="error-message" id="destError"></div>
-</div>
+                <div class="trip-type-group">
+                    <div class="trip-option">
+                        <input type="radio" name="trip_type" id="trip_oneway" value="oneway" checked>
+                        <label for="trip_oneway"><i class="fa-solid fa-arrow-right"></i> One Way</label>
+                    </div>
+                    <div class="trip-option">
+                        <input type="radio" name="trip_type" id="trip_round" value="round">
+                        <label for="trip_round"><i class="fa-solid fa-arrow-right-arrow-left"></i> Return</label>
+                    </div>
+                    <div class="trip-option">
+                        <input type="radio" name="trip_type" id="trip_multi" value="multi">
+                        <label for="trip_multi"><i class="fa-solid fa-layer-group"></i> Multi-city</label>
+                    </div>
+                </div>
+
+                <div id="standardFields">
+                    <div class="field">
+                        <label><i class="fa-solid fa-location-dot"></i> From</label>
+                        <div class="input-icon">
+                            <i class="fa-solid fa-city"></i>
+                            <select name="from" id="originInput" class="destination-select">
+                                <option value="">Select departure city</option>
+                                @foreach($destinations as $city => $code)
+                                    <option value="{{ $code }}">{{ $city }} ({{ $code }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="error-message" id="originError"></div>
+                    </div>
+                    <div class="field">
+                        <label><i class="fa-solid fa-location-arrow"></i> To</label>
+                        <div class="input-icon">
+                            <i class="fa-solid fa-map-pin"></i>
+                            <select name="to" id="destInput" class="destination-select">
+                                <option value="">Select arrival city</option>
+                                @foreach($destinations as $city => $code)
+                                    <option value="{{ $code }}">{{ $city }} ({{ $code }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="error-message" id="destError"></div>
+                    </div>
+                    <div class="input-row">
+                        <div class="field">
+                            <label><i class="fa-regular fa-calendar"></i> Departure</label>
+                            <div class="input-icon">
+                                <i class="fa-regular fa-calendar-check"></i>
+                                <input type="date" name="departure_date" id="departureDate">
+                            </div>
+                            <div class="error-message" id="departureError"></div>
+                        </div>
+                        <div class="field" id="returnDateContainer" style="display: none;">
+                            <label><i class="fa-regular fa-calendar-plus"></i> Return</label>
+                            <div class="input-icon">
+                                <i class="fa-regular fa-calendar-alt"></i>
+                                <input type="date" name="return_date" id="returnDate">
+                            </div>
+                            <div class="error-message" id="returnError"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="multiCityPanel" class="multi-city-panel hidden">
+                    <div id="segmentsContainer"></div>
+                    <button type="button" id="addSegmentBtn" class="add-segment-btn">
+                        <i class="fa-solid fa-plus-circle"></i> Add another flight
+                    </button>
+                    <div id="multiCityGlobalError" class="error-message" style="display: none;"></div>
+                </div>
+
+                <hr>
+
                 <div class="input-row">
                     <div class="field">
-                        <label><i class="fa-regular fa-calendar"></i> Departure</label>
+                        <label><i class="fa-solid fa-crown"></i> Cabin class</label>
                         <div class="input-icon">
-                            <i class="fa-regular fa-calendar-check"></i>
-                            <input type="date" name="departure_date" id="departureDate">
+                            <i class="fa-solid fa-chair"></i>
+                            <select name="class" id="cabinClass">
+                                <option value="economy">Economy</option>
+                                <option value="premium">Premium Economy</option>
+                                <option value="business">Business</option>
+                                <option value="first">First Class</option>
+                            </select>
                         </div>
-                        <div class="error-message" id="departureError"></div>
-                    </div>
-                    <div class="field" id="returnDateContainer" style="display: none;">
-                        <label><i class="fa-regular fa-calendar-plus"></i> Return</label>
-                        <div class="input-icon">
-                            <i class="fa-regular fa-calendar-alt"></i>
-                            <input type="date" name="return_date" id="returnDate">
-                        </div>
-                        <div class="error-message" id="returnError"></div>
                     </div>
                 </div>
-            </div>
 
-            <div id="multiCityPanel" class="multi-city-panel hidden">
-                <div id="segmentsContainer"></div>
-                <button type="button" id="addSegmentBtn" class="add-segment-btn">
-                    <i class="fa-solid fa-plus-circle"></i> Add another flight
+                <div class="input-group">
+                    <label><i class="fa-solid fa-users"></i> Passengers</label>
+                    <div class="passenger-grid">
+                        <div class="field">
+                            <div class="passenger-label">Adults <span>(12+ yrs)</span></div>
+                            <div class="input-icon">
+                                <i class="fa-solid fa-user"></i>
+                                <input type="number" name="adults" id="adults" min="1" max="9" value="1">
+                            </div>
+                            <div class="error-message" id="adultsError"></div>
+                        </div>
+                        <div class="field">
+                            <div class="passenger-label">Children <span>(2-11 yrs)</span></div>
+                            <div class="input-icon">
+                                <i class="fa-solid fa-child"></i>
+                                <input type="number" name="children" id="children" min="0" max="6" value="0">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <div class="passenger-label">Infants <span>(under 2 yrs)</span></div>
+                            <div class="input-icon">
+                                <i class="fa-solid fa-baby"></i>
+                                <input type="number" name="infants" id="infants" min="0" max="4" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="primary-btn">
+                    <i class="fa-solid fa-magnifying-glass"></i> Search Flights
                 </button>
-                <div id="multiCityGlobalError" class="error-message" style="display: none;"></div>
-            </div>
-
-            <hr>
-
-            <div class="input-row">
-                <div class="field">
-                    <label><i class="fa-solid fa-crown"></i> Cabin class</label>
-                    <div class="input-icon">
-                        <i class="fa-solid fa-chair"></i>
-                        <select name="class" id="cabinClass">
-                            <option value="economy">Economy</option>
-                            <option value="premium">Premium Economy</option>
-                            <option value="business">Business</option>
-                            <option value="first">First Class</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label><i class="fa-solid fa-users"></i> Passengers</label>
-                <div class="passenger-grid">
-                    <div class="field">
-                        <div class="passenger-label">Adults <span>(12+ yrs)</span></div>
-                        <div class="input-icon">
-                            <i class="fa-solid fa-user"></i>
-                            <input type="number" name="adults" id="adults" min="1" max="9" value="1">
-                        </div>
-                        <div class="error-message" id="adultsError"></div>
-                    </div>
-                    <div class="field">
-                        <div class="passenger-label">Children <span>(2-11 yrs)</span></div>
-                        <div class="input-icon">
-                            <i class="fa-solid fa-child"></i>
-                            <input type="number" name="children" id="children" min="0" max="6" value="0">
-                        </div>
-                    </div>
-                    <div class="field">
-                        <div class="passenger-label">Infants <span>(under 2 yrs)</span></div>
-                        <div class="input-icon">
-                            <i class="fa-solid fa-baby"></i>
-                            <input type="number" name="infants" id="infants" min="0" max="4" value="0">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <button type="submit" class="primary-btn">
-                <i class="fa-solid fa-magnifying-glass"></i> Search Flights
-            </button>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -476,7 +482,6 @@
         const addSegmentBtn = document.getElementById('addSegmentBtn');
         const multiCityGlobalError = document.getElementById('multiCityGlobalError');
 
-        // Helper: clear error for a specific field
         function clearFieldError(fieldId, errorId) {
             const field = document.getElementById(fieldId);
             const errorDiv = document.getElementById(errorId);
@@ -491,7 +496,6 @@
             if (errorDiv) errorDiv.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${message}`;
         }
 
-        // Clear all standard errors
         function clearStandardErrors() {
             clearFieldError('originInput', 'originError');
             clearFieldError('destInput', 'destError');
@@ -499,7 +503,6 @@
             clearFieldError('returnDate', 'returnError');
         }
 
-        // Validate standard (oneway/round) – called only on submit
         function validateStandard() {
             let isValid = true;
             clearStandardErrors();
@@ -542,11 +545,9 @@
             return isValid;
         }
 
-        // Validate multi-city segments – called only on submit
         function validateMultiCity() {
             const segments = document.querySelectorAll('#segmentsContainer .segment-card');
             let isValid = true;
-            // remove previous per-segment errors
             segments.forEach(seg => {
                 seg.classList.remove('error-segment');
                 const existingErrors = seg.querySelectorAll('.segment-error');
@@ -612,7 +613,6 @@
             errorDiv.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${message}`;
         }
 
-        // Validate passengers (at least one adult)
         function validatePassengers() {
             const adults = parseInt(adultsInput.value);
             if (isNaN(adults) || adults < 1) {
@@ -624,7 +624,6 @@
             }
         }
 
-        // Clear all errors (used when trip type changes)
         function clearAllErrors() {
             clearStandardErrors();
             clearFieldError('adults', 'adultsError');
@@ -637,16 +636,13 @@
             });
         }
 
-        // --- Live error clearing when user types / changes a field ---
         function attachLiveErrorClearing() {
-            // Standard fields
             originInput.addEventListener('input', () => clearFieldError('originInput', 'originError'));
             destInput.addEventListener('input', () => clearFieldError('destInput', 'destError'));
             departureDateInput.addEventListener('change', () => clearFieldError('departureDate', 'departureError'));
             returnDateInput.addEventListener('change', () => clearFieldError('returnDate', 'returnError'));
             adultsInput.addEventListener('input', () => clearFieldError('adults', 'adultsError'));
 
-            // For multi-city: we'll use event delegation on segments container
             segmentsContainer.addEventListener('input', (e) => {
                 if (e.target.classList && (e.target.classList.contains('segment-from') || e.target.classList.contains('segment-to') || e.target.classList.contains('segment-date'))) {
                     const segmentCard = e.target.closest('.segment-card');
@@ -660,7 +656,6 @@
             });
         }
 
-        // --- Trip type switching logic ---
         function toggleTripType() {
             const isMulti = tripMulti.checked;
             const isRound = tripRound.checked;
@@ -742,7 +737,6 @@
             }
         }
 
-        // --- Multi-city dynamic segment management ---
         function createSegmentRow(index, withRemove = true, prefill = { from: '', to: '', date: '' }) {
             const segmentDiv = document.createElement('div');
             segmentDiv.className = 'segment-card';
@@ -825,7 +819,6 @@
             reindexSegments();
         }
 
-        // --- FORM SUBMIT: only here we validate and show errors ---
         form.addEventListener('submit', function(e) {
             let isValid = false;
             if (tripMulti.checked) {
@@ -840,7 +833,6 @@
                 return;
             }
 
-            // Prepare data for submission (multi-city vs standard)
             const existingMultiInputs = form.querySelectorAll('input[name^="multi_segments"]');
             existingMultiInputs.forEach(el => el.remove());
 
@@ -884,21 +876,18 @@
             }
         });
 
-        // Event listeners
         tripOneway.addEventListener('change', toggleTripType);
         tripRound.addEventListener('change', toggleTripType);
         tripMulti.addEventListener('change', toggleTripType);
         addSegmentBtn.addEventListener('click', addSegment);
         attachLiveErrorClearing();
 
-        // Initial setup
         const today = new Date().toISOString().split('T')[0];
         departureDateInput.min = today;
         if (returnDateInput) returnDateInput.min = today;
         initMultiCitySegments();
         enableMultiSegments(false);
-        toggleTripType();  // sets one-way as active
+        toggleTripType();
     })();
 </script>
-</body>
-</html>
+@endsection

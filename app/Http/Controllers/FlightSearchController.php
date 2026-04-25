@@ -11,7 +11,7 @@ class FlightController extends Controller
     // Show flight search form
     public function index()
     {
-        return view('flight');
+        return view('flights.search');
     }
     
 
