@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
-            $table->string('role')->default('user'); // Add role column with default value 'user'
+            $table->enum('role', ['user', 'admin'])->default('user');
         });
     }
 

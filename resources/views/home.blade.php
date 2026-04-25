@@ -570,7 +570,7 @@
     </div>
 </section>
 
-{{-- Destinations Section (Agoda style: small circle arrows + edge fade) --}}
+{{-- Destinations Section}}
 <section class="section-gap section-gap-light">
     <div class="container" style="position: relative; overflow: visible;">
         <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
