@@ -97,7 +97,7 @@
 </div>
 
 <style>
-    .combo-container { max-width: 900px; margin: 0 auto; }
+    .combo-container { max-width: 900px; margin: 2rem auto 2rem auto; }
     .combo-card { background: white; border-radius: 1.5rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 1.5rem; }
     .card-header { background: linear-gradient(135deg, #0f2b3d, #1f4b6e); padding: 1.5rem 2rem; color: white; }
     .card-header h2 { font-size: 1.8rem; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 10px; }

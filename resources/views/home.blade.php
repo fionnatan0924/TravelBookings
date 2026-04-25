@@ -266,6 +266,24 @@
 .carousel-control.hidden {
     display: none;
 }
+/* Combo cards equal height + button pinned to bottom */
+.combo-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;               /* make all cards same height */
+}
+
+.combo-card .card-content {
+    flex: 1;                   /* grow to fill available space */
+    display: flex;
+    flex-direction: column;
+}
+
+.combo-card .card-content .button-primary {
+    margin-top: auto;          /* push button to bottom */
+    width: 100%;
+    text-align: center;
+}
 
 
 
@@ -385,7 +403,6 @@
             <a href="{{ route('combos.index') }}" class="button button-secondary" style="padding: 12px 20px;">View all</a>
         </div>
 
-        {{-- Sample Combo Data (matches the image style) --}}
         @php
             $combos = [
                 [
@@ -443,18 +460,22 @@
 
         <div class="grid-cards">
             @foreach(array_slice($combos, 0, 4) as $combo)
-            <div class="card card-hover">
-                <div class="card-content">
+            {{-- Make each card a flex column, and content area grows to push button to bottom --}}
+            <div class="card card-hover" style="display: flex; flex-direction: column; height: 100%;">
+                <div class="card-content" style="flex: 1; display: flex; flex-direction: column; padding: 1.25rem;">
                     <div style="font-weight: 700; font-size: 1.02rem; margin-bottom: 0.75rem;">{{ $combo['from'] }} → {{ $combo['to'] }}</div>
                     <div class="card-meta">{{ $combo['airline'] }}</div>
                     <div style="color: #6b7280; font-size: 0.95rem; margin-bottom: 1rem;">{{ $combo['flight_date'] }}</div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap;">
                         <span style="font-weight: 600;">{{ $combo['hotel_name'] }}</span>
-                        <span style="color: #f59e0b;">@for($i = 1; $i <= floor($combo['hotel_rating']); $i++) ★ @endfor @if($combo['hotel_rating'] - floor($combo['hotel_rating']) >= 0.5) ½ @endif</span>
+                        <span style="color: #f59e0b;">
+                            @for($i = 1; $i <= floor($combo['hotel_rating']); $i++) ★ @endfor
+                            @if($combo['hotel_rating'] - floor($combo['hotel_rating']) >= 0.5) ½ @endif
+                        </span>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem;">
                         <div>
                             <span class="card-price">RM {{ number_format($combo['price']) }}</span>
                             <span style="color: #6b7280; font-size: 0.95rem;">/ person</span>
@@ -464,7 +485,10 @@
                         @endif
                     </div>
 
-                    <button class="button button-primary" style="width: 100%; margin-top: 1.2rem;">Book Now</button>
+                    {{-- Spacer that takes remaining space, pushing button to bottom --}}
+                    <div style="flex: 1;"></div>
+
+                    <a href="{{ route('combo.index') }}" class="button button-primary" style="width: 100%; text-align: center; margin-top: 0; text-decoration: none;">Book Now</a>
                 </div>
             </div>
             @endforeach
@@ -570,7 +594,7 @@
     </div>
 </section>
 
-{{-- Destinations Section}}
+{{-- Destinations Section--}}
 <section class="section-gap section-gap-light">
     <div class="container" style="position: relative; overflow: visible;">
         <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
@@ -641,18 +665,7 @@
     </div>
 </section>
 
-{{-- CTA --}}
-<section class="section-gap" style="background: #111827; color: #ffffff;">
-    <div class="container" style="display: grid; grid-template-columns: 1.2fr 0.8fr; align-items: center; gap: 28px;">
-        <div>
-            <h2 class="section-title" style="color: #ffffff;">Ready for your next adventure?</h2>
-            <p style="color: rgba(255,255,255,0.8); max-width: 550px; margin-top: 0.75rem;">Sign up today and get RM 200 off your first booking.</p>
-        </div>
-        <div style="text-align: left;">
-            <a href="#" class="button button-primary">Sign up for free</a>
-        </div>
-    </div>
-</section>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
