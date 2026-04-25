@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
         $this->call(HotelSeeder::class);
         $this->call(DestinationsAndAttractionsSeeder::class);
         $this->call(TestimonialsSeeder::class);
-        $this->call(UsersSeeder::class);
+        $this->call(UsersTableSeeder::class);
 
     }
 }
