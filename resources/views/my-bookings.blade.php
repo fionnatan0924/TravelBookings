@@ -25,6 +25,8 @@
                             <i class="fa-solid fa-umbrella-beach"></i> Combo
                         @elseif($booking->type == 'hotel')
                             <i class="fa-solid fa-hotel"></i> Hotel
+                        @elseif($booking->type == 'attraction')
+                            <i class="fa-solid fa-ticket"></i> Attraction
                         @endif
                     </div>
                     <div class="booking-info">
@@ -41,6 +43,8 @@
                             <a href="{{ route('combo.show', $booking) }}" class="btn-sm">View details</a>
                         @elseif($booking->type == 'hotel')
                             <a href="{{ route('hotel.receipt', $booking) }}" class="btn-sm">View details</a>
+                        @elseif($booking->type == 'attraction')
+                            <a href="{{ route('attraction.receipt', $booking->id) }}" class="btn-sm">View receipt</a>
                         @endif
                     </div>
                 </div>
@@ -79,6 +83,7 @@
     .booking-card.flight { border-left-color: #3498db; }
     .booking-card.combo { border-left-color: #e67e22; }
     .booking-card.hotel { border-left-color: #2ecc71; }
+    .booking-card.attraction { border-left-color: #9b59b6; }
     .booking-type {
         font-weight: 600;
         font-size: 0.8rem;

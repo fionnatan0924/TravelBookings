@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Payment')
+@section('title', 'Hotel Payment')
 
 @section('content')
 @if ($errors->any())
@@ -14,18 +14,13 @@
 @endif
 <div class="payment-container">
     <div class="payment-card">
-        <h1><i class="fa-regular fa-credit-card"></i> Payment</h1>
-        <p>Complete your {{ ucfirst($type) }} booking</p>
+        <h1><i class="fa-regular fa-credit-card"></i> Hotel Payment</h1>
+        <p>Complete your hotel booking</p>
         <div class="summary">
             <p><strong>Total:</strong> RM {{ number_format($total, 2) }}</p>
         </div>
 
-        <form method="POST" action="{{ 
-    $type === 'flight' ? route('payment.flight.process') : 
-    ($type === 'hotel' ? route('payment.hotel.process') : 
-    ($type === 'combo' ? route('payment.combo.process') : 
-    ($type === 'attraction' ? route('payment.attraction.process') : '#'))) 
-}}">
+        <form method="POST" action="{{ route('payment.hotel.process') }}">
             @csrf
             <div class="form-group">
                 <label>Card Number</label>

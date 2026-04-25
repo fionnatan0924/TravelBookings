@@ -57,5 +57,10 @@ public function hotelBookings()
 {
     return $this->hasMany(\App\Models\HotelBooking::class);
 }
+
+public function attractionBookings()
+{
+    return $this->hasMany(\App\Models\AttractionBooking::class);
+}
     
 }

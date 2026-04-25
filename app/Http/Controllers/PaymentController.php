@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\ComboBooking;
 use App\Models\Passenger;
 use App\Models\ComboPassenger;
+use App\Models\AttractionBooking; // add this
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -25,14 +26,11 @@ class PaymentController extends Controller
             return redirect()->route('flights.index')->with('error', 'No booking in progress.');
         }
         $total = $booking['total_price'];
-        $type = 'flight';
-        $details = $booking;
-        return view('payment.form', compact('total', 'type', 'details'));
+        return view('payment.flight', compact('total'));
     }
 
     public function processFlightPayment(Request $request)
     {
-        // Validate payment details
         $cardNumber = str_replace(' ', '', $request->card_number);
         $request->merge(['card_number' => $cardNumber]);
         $request->validate([
@@ -46,7 +44,6 @@ class PaymentController extends Controller
             return redirect()->route('flights.index')->with('error', 'No booking data.');
         }
 
-        // Create flight booking
         $booking = Booking::create([
             'user_id' => Auth::id(),
             'outbound_flight_id' => $bookingData['outbound_flight_id'],
@@ -59,7 +56,6 @@ class PaymentController extends Controller
             'booking_date' => now(),
         ]);
 
-        // Save passengers
         foreach ($bookingData['passengers'] as $passenger) {
             Passenger::create([
                 'booking_id' => $booking->id,
@@ -83,9 +79,7 @@ class PaymentController extends Controller
             return redirect()->route('hotels.index')->with('error', 'No booking in progress.');
         }
         $total = $booking['total_price'];
-        $type = 'hotel';
-        $details = $booking;
-        return view('payment.form', compact('total', 'type', 'details'));
+        return view('payment.hotel', compact('total'));
     }
 
     public function processHotelPayment(Request $request)
@@ -126,9 +120,7 @@ class PaymentController extends Controller
             return redirect()->route('combo.index')->with('error', 'No booking in progress.');
         }
         $total = $booking['total_price'];
-        $type = 'combo';
-        $details = $booking;
-        return view('payment.form', compact('total', 'type', 'details'));
+        return view('payment.combo', compact('total'));
     }
 
     public function processComboPayment(Request $request)
@@ -158,7 +150,6 @@ class PaymentController extends Controller
             'status' => 'confirmed',
         ]);
 
-        // Save combo passengers
         foreach ($bookingData['passengers'] as $passenger) {
             ComboPassenger::create([
                 'combo_booking_id' => $comboBooking->id,
@@ -172,5 +163,45 @@ class PaymentController extends Controller
 
         session()->forget('pending_combo_booking');
         return redirect()->route('combo.show', $comboBooking->id)->with('success', 'Payment successful! Combo confirmed.');
+    }
+
+    // ========== ATTRACTION PAYMENT ==========
+    public function attractionPaymentForm()
+    {
+        $booking = session('pending_attraction_booking');
+        if (!$booking) {
+            return redirect()->route('attractions.index')->with('error', 'No booking in progress.');
+        }
+        $total = $booking['total_price'];
+        return view('payment.attraction', compact('total'));
+    }
+
+    public function processAttractionPayment(Request $request)
+    {
+        $cardNumber = str_replace(' ', '', $request->card_number);
+        $request->merge(['card_number' => $cardNumber]);
+        $request->validate([
+            'card_number' => 'required|string|size:16|regex:/^\d{16}$/',
+            'expiry' => ['required', 'string', 'regex:/^(0[1-9]|1[0-2])\/([0-9]{2})$/'],
+            'cvv' => 'required|string|size:3|regex:/^\d{3}$/',
+        ]);
+
+        $bookingData = session('pending_attraction_booking');
+        if (!$bookingData) {
+            return redirect()->route('attractions.index')->with('error', 'No booking data.');
+        }
+
+        $attractionBooking = AttractionBooking::create([
+            'user_id' => Auth::id(),
+            'attraction_id' => $bookingData['attraction_id'],
+            'number_of_people' => $bookingData['number_of_people'],
+            'total_price' => $bookingData['total_price'],
+            'booking_reference' => strtoupper(Str::random(10)),
+            'status' => 'confirmed',
+            'booking_date' => now(),
+        ]);
+
+        session()->forget('pending_attraction_booking');
+        return redirect()->route('attraction.receipt', $attractionBooking->id)->with('success', 'Payment successful! Attraction booked.');
     }
 }

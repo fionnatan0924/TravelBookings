@@ -99,7 +99,7 @@
 
             <!-- Right: Booking Form -->
             <div>
-                <form action="{{ route('checkout.attraction') }}" method="POST">
+                <form action="{{ route('attraction.book.form') }}" method="POST">
                     @csrf
                     <input type="hidden" name="attraction_id" value="{{ $attraction->id }}">
 
@@ -146,7 +146,7 @@
 <script>
     const input = document.getElementById('number_of_people');
     const displayPeople = document.getElementById('display-people');
-    const totalPrice = document.getElementById('total-price');
+    const totalPriceSpan = document.getElementById('total-price');
     const pricePerPerson = {{ $attraction->price }};
 
     document.querySelectorAll('.quantity-btn').forEach(btn => {
@@ -169,38 +169,7 @@
     function updateDisplay() {
         const people = parseInt(input.value) || 1;
         displayPeople.textContent = people;
-        totalPrice.textContent = 'RM ' + (pricePerPerson * people).toFixed(2);
-    }
-</script>
-
-<script>
-    const input = document.getElementById('number_of_people');
-    const displayPeople = document.getElementById('display-people');
-    const totalPrice = document.getElementById('total-price');
-    const pricePerPerson = {{ $attraction->price }};
-
-    document.querySelectorAll('.quantity-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const action = this.dataset.action;
-            let current = parseInt(input.value);
-
-            if (action === 'increase' && current < 50) {
-                input.value = current + 1;
-            } else if (action === 'decrease' && current > 1) {
-                input.value = current - 1;
-            }
-
-            updateDisplay();
-        });
-    });
-
-    input.addEventListener('change', updateDisplay);
-
-    function updateDisplay() {
-        const people = parseInt(input.value) || 1;
-        displayPeople.textContent = people;
-        totalPrice.textContent = 'RM ' + (pricePerPerson * people).toFixed(2);
+        totalPriceSpan.textContent = 'RM ' + (pricePerPerson * people).toFixed(2);
     }
 </script>
 @endsection
