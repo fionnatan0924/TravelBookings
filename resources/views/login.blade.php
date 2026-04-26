@@ -128,7 +128,7 @@
 </head>
 <body>
 <div class="container">
-    <h2><i class="fa-regular fa-key"></i> User Login</h2>
+    <h2><i class="fa-solid fa-user"></i> User Login</h2>
 
     @if ($errors->any())
         <div class="error">
