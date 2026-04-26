@@ -140,6 +140,7 @@ Route::middleware(['can:admin'])->prefix('admin')->name('admin.')->group(functio
     Route::get('/flights/{flight}/edit', [AdminController::class, 'editFlight'])->name('flights.edit');
     Route::put('/flights/{flight}', [AdminController::class, 'updateFlight'])->name('flights.update');
     Route::delete('/flights/{flight}', [AdminController::class, 'deleteFlight'])->name('flights.delete');
+    Route::get('/flights/create', [AdminController::class, 'createFlight'])->name('flights.create'); 
 
     // Hotels Management
     Route::get('/hotels', [AdminController::class, 'hotels'])->name('hotels');

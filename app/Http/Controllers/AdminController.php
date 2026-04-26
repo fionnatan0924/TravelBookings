@@ -104,6 +104,11 @@ class AdminController extends Controller
         return view('admin.flights.index', compact('flights'));
     }
 
+    public function createFlight()
+    {
+    return view('admin.flights.create');
+    }
+
     public function storeFlight(Request $request)
     {
         $validated = $request->validate([

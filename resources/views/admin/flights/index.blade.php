@@ -9,6 +9,13 @@
         <p>View and manage flight schedules</p>
     </div>
 
+    <!-- Add Flight Button -->
+    <div class="actions-bar">
+        <a href="{{ route('admin.flights.create') }}" class="btn-primary">
+            <i class="fa-solid fa-plus"></i> Add Flight
+        </a>
+    </div>
+
     <div class="table-responsive">
         <table class="admin-table">
             <thead>
@@ -80,6 +87,28 @@
         color: #6c7e94;
     }
 
+    .actions-bar {
+        margin-bottom: 1.5rem;
+    }
+    .btn-primary {
+        background: linear-gradient(105deg, #0f2b3d, #1f4b6e);
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 40px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        transition: 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+
     .table-responsive {
         overflow-x: auto;
     }
@@ -89,7 +118,7 @@
         background: white;
         border-radius: 1rem;
         overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     .admin-table th,
     .admin-table td {
