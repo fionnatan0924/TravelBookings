@@ -14,7 +14,7 @@ class DestinationsAndAttractionsSeeder extends Seeder
     public function run(): void
     {
         // ------------------------------------------------------------
-        // 1. DESTINATIONS (from your original array)
+        // 1. DESTINATIONS 
         // ------------------------------------------------------------
         $destinations = [
             ['name' => 'Kuala Lumpur', 'starting_price' => 150, 'color' => '#FF6B6B', 'image_url' => 'https://www.hostelworld.com/blog/wp-content/uploads/dreamstimesmall_322299871.jpg'],
@@ -51,7 +51,7 @@ class DestinationsAndAttractionsSeeder extends Seeder
         }
 
         // ------------------------------------------------------------
-        // 2. ATTRACTIONS (combined from all your previous data + Vietnam)
+        // 2. ATTRACTIONS 
         // ------------------------------------------------------------
         $attractions = [
             // Bali
