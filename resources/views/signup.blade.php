@@ -127,7 +127,7 @@
 </head>
 <body>
 <div class="container">
-    <h2><i class="fa-regular fa-user-plus"></i> User Sign Up</h2>
+    <h2><i class="fa-solid fa-user-plus"></i> User Sign Up</h2>
 
     @if($errors->any())
         <div class="alert-error">

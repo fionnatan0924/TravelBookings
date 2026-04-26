@@ -151,7 +151,7 @@
             </form>
 
             <div class="password-section">
-                <h3><i class="fa-regular fa-lock"></i> Change Password</h3>
+                <h3><i class="fa-solid fa-lock"></i> Change Password</h3>
                 <form method="POST" action="{{ route('profile.password') }}">
                     @csrf
                     <div class="form-group">
