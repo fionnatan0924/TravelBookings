@@ -68,6 +68,71 @@
 </div>
 
 <style>
+    .w-5 {
+        width: 14px;
+        height: 14px;
+    }
+
+    nav[role="navigation"] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 32px;
+        gap: 14px;
+    }
+
+    nav[role="navigation"] > div:first-child {
+        font-size: 14px;
+        color: #6B7280;
+    }
+
+    nav[role="navigation"] > div:last-child {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    nav[role="navigation"] span,
+    nav[role="navigation"] a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 38px;
+        padding: 0 10px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    nav[role="navigation"] a {
+        color: #374151;
+        background: #ffffff;
+        border: 1px solid #E5E7EB;
+    }
+
+    nav[role="navigation"] a:hover {
+    background: #F3F4F6;
+    border-color: #D1D5DB;
+    }
+
+    nav[role="navigation"] span[aria-current="page"] {
+        background: #1F2937;
+        color: white;
+        border: 1px solid #1F2937;
+        font-weight: 600;
+    }
+
+    nav[role="navigation"] span[aria-disabled="true"] {
+        color: #D1D5DB;
+        background: #F9FAFB;
+        border: 1px solid #E5E7EB;
+        cursor: not-allowed;
+    }
+
     .admin-flights {
         max-width: 1400px;
         margin: 0 auto;
